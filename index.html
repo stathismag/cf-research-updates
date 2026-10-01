@@ -243,14 +243,14 @@ function tabs(){
 }
 function controls(isPub){
   return `<div class="ctl">
-    <input placeholder="Search titles, abstracts, authors…" value="${esc(S.q)}" oninput="S.q=this.value;list()">
-    ${isPub?`<select onchange="S.j=this.value;list()"><option value="">All journals</option>${Object.keys(D.journals).map(k=>`<option ${S.j===k?"selected":""} value="${k}">${k}</option>`).join("")}</select>`:""}
-    <select onchange="S.a=this.value;list()"><option value="">All areas</option>${[...D.areas,"General"].map(a=>`<option ${S.a===a?"selected":""}>${esc(a)}</option>`).join("")}</select>
-    <select onchange="S.sort=this.value;list()"><option value="date">Newest first</option><option value="journal" ${S.sort==="journal"?"selected":""}>By journal</option><option value="title" ${S.sort==="title"?"selected":""}>By title</option></select>
+    <input placeholder="Search titles, abstracts, authors…" value="${esc(S.q)}" oninput="S.q=this.value;renderList()">
+    ${isPub?`<select onchange="S.j=this.value;renderList()"><option value="">All journals</option>${Object.keys(D.journals).map(k=>`<option ${S.j===k?"selected":""} value="${k}">${k}</option>`).join("")}</select>`:""}
+    <select onchange="S.a=this.value;renderList()"><option value="">All areas</option>${[...D.areas,"General"].map(a=>`<option ${S.a===a?"selected":""}>${esc(a)}</option>`).join("")}</select>
+    <select onchange="S.sort=this.value;renderList()"><option value="date">Newest first</option><option value="journal" ${S.sort==="journal"?"selected":""}>By journal</option><option value="title" ${S.sort==="title"?"selected":""}>By title</option></select>
     ${S.th&&D.themes[S.th]?`<span class="chip" onclick="setTheme('${S.th}')">${esc(D.themes[S.th].n)} ✕</span>`:""}
   </div><div class="meta" id="meta"></div><div id="list"></div>`;
 }
-function list(){
+function renderList(){
   const src=S.tab==="pubs"?D.pubs:D.ssrn,r=filt(src);
   $("meta").textContent=`${r.length} of ${src.length} ${S.tab==="pubs"?"online-first articles":"working papers"} · ${period()}`;
   $("list").innerHTML=r.length?r.map(p=>`<div class="item" onclick="this.classList.toggle('open')">
@@ -266,7 +266,7 @@ const sheetMsg=(status,what)=>status==="error"?`Could not load the ${what.toLowe
 function render(){
   tabs();
   const warn=D.error?`<div class="warn">${esc(D.error)}</div>`:"";
-  if(S.tab==="pubs"||S.tab==="ssrn"){$("panel").innerHTML=warn+controls(S.tab==="pubs");list();return}
+  if(S.tab==="pubs"||S.tab==="ssrn"){$("panel").innerHTML=warn+controls(S.tab==="pubs");renderList();return}
   if(S.tab==="conf"){
     const rows=liveConfs().sort((a,b)=>(a.date||"9").localeCompare(b.date||"9"));
     $("panel").innerHTML=warn+(rows.length?`<table><tr><th>Event</th><th>Organiser</th><th>Location</th><th>Dates</th><th>Submission deadline</th><th>Theme</th></tr>${rows.map(c=>`<tr>
