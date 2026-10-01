@@ -15,6 +15,8 @@ conferences.json             conference listings, edited by hand
 jobs.json                    job listings, edited by hand
 netlify.toml                 stops Netlify caching the .json files
 scripts/fetch_papers.py      pulls new papers from Crossref, tags them, writes data.json
+scripts/send_digest.py       emails the new papers to the Buttondown newsletter
+sent.json                    papers already emailed (written by the Action)
 scripts/config.json          journals, themes, keyword rules
 .github/workflows/update.yml schedule for the script
 ```
@@ -33,6 +35,25 @@ scripts/config.json          journals, themes, keyword rules
 6. Netlify → Project configuration → Forms → **Enable form detection**, then redeploy once. Subscriber emails
    appear under Forms → `subscribe` (free tier: 100 submissions/month; email notifications can be added there).
 7. Done. Conferences and jobs need no further setup (see below).
+
+## Newsletter (Buttondown)
+
+Subscribers sign up on the site; Buttondown sends the confirmation email (double opt-in), handles unsubscribes and
+keeps the list. After each paper update, the Action emails the new papers to everyone on the list. Papers already
+emailed are remembered in `sent.json`, so a rerun never sends the same paper twice.
+
+One-time setup:
+
+1. Create a Buttondown account at https://buttondown.com and note your username (buttondown.com/USERNAME).
+2. Buttondown → Settings → API → copy the API key.
+3. Repo → Settings → Secrets and variables → Actions → New repository secret: `BUTTONDOWN_API_KEY` = that key.
+4. In `index.html`, set `const NEWSLETTER="USERNAME";` and commit. Until then, signups only go to Netlify Forms.
+5. Run the workflow once from the Actions tab. The log's "Email the digest" step says `Sent '…' with N papers`.
+
+The first run emails every paper currently in `data.json`. To start from the next update instead, put the current
+`url` values into `sent.json` first. Preview the email locally with `python scripts/send_digest.py --dry-run`; use
+`--draft` to save it in Buttondown for review instead of sending (add it to the workflow step to review before each send).
+If Buttondown rejects a send, the step fails (red run) but `data.json` is still committed.
 
 ## Conferences and jobs
 
