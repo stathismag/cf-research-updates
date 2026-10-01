@@ -1,0 +1,41 @@
+name: Update research listings
+
+on:
+  schedule:
+    - cron: "0 6 1,15 * *"   # 06:00 UTC on the 1st and 15th of every month
+  workflow_dispatch:         # also lets you run it by hand from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      CROSSREF_EMAIL: ${{ secrets.CROSSREF_EMAIL }}   # Settings → Secrets and variables → Actions
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests
+
+      - name: Verify ISSNs
+        run: python scripts/fetch_papers.py --check
+
+      - name: Fetch new papers
+        run: python scripts/fetch_papers.py
+
+      - name: Commit data.json if it changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update listings $(date -u +%Y-%m-%d)"
+            git push
+          fi

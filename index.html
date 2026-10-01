@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corporate Finance Research Updates</title>
+<meta name="description" content="Bi-weekly digest of new corporate finance research, tagged by classic area and by emerging themes: climate, biodiversity, cybersecurity, crypto, geopolitics, AI and supply chains.">
+<style>
+:root{--ink:#0f1b2d;--ink2:#2b3a52;--mute:#6b7a90;--line:#e3e7ee;--bg:#f7f6f2;--card:#fff;--acc:#0e7c66;--acc2:#c8862a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+.serif{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+header{background:var(--ink);color:#fff;position:relative;overflow:hidden}
+header::after{content:"";position:absolute;right:-120px;top:-140px;width:460px;height:460px;border-radius:50%;background:radial-gradient(circle,rgba(14,124,102,.55),transparent 65%);animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(-80px,60px)}}
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:16px;flex-wrap:wrap;position:relative;z-index:1}
+.logo{display:flex;align-items:center;gap:12px}
+.mark{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:800;font-size:15px}
+.logo b{font-size:19px}.logo small{display:block;color:#9fb0c7;font-size:12px}
+.links{display:flex;gap:18px;font-size:13.5px}.links a{color:#cfe0f5}
+.hero{padding:34px 0 40px;position:relative;z-index:1}
+.hero h1{font-size:clamp(28px,4vw,44px);font-weight:600;line-height:1.15;max-width:760px}
+.hero h1 em{color:#7fe0c6;font-style:italic}
+.hero p{color:#b8c6d9;margin-top:12px;max-width:680px;font-size:15px}
+.sub{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
+.sub input{padding:11px 14px;border-radius:8px;border:1px solid #33465f;background:#16263d;color:#fff;width:280px;font-size:14px}
+.sub button{padding:11px 18px;border:0;border-radius:8px;background:var(--acc);color:#fff;font-weight:600;cursor:pointer;transition:transform .15s}
+.sub button:hover{transform:translateY(-1px)}
+.stats{display:flex;gap:30px;margin-top:28px;flex-wrap:wrap}
+.stat b{font-size:26px;display:block}.stat span{font-size:12px;color:#9fb0c7;text-transform:uppercase;letter-spacing:.8px}
+section{padding:30px 0}
+h2{font-size:22px;font-weight:600;margin-bottom:4px}
+.hint{color:var(--mute);font-size:13.5px;margin-bottom:16px}
+.radar{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:12px}
+.tc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;position:relative;overflow:hidden;transition:all .2s}
+.tc::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+.tc:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(15,27,45,.08)}
+.tc.on{background:var(--ink);color:#fff;border-color:var(--ink)}.tc.on .td{color:#b8c6d9}
+.th{display:flex;justify-content:space-between;align-items:baseline}
+.th b{font-size:14.5px}.cnt{font-size:22px;font-weight:700;color:var(--c)}
+.td{font-size:12.5px;color:var(--mute);margin-top:5px}
+.bar{height:4px;background:var(--line);border-radius:4px;margin-top:10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);border-radius:4px;transition:width .6s}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto}
+.tab{padding:10px 16px;border:0;background:none;font-size:14.5px;cursor:pointer;color:var(--mute);border-bottom:2px solid transparent;white-space:nowrap}
+.tab.on{color:var(--ink);border-color:var(--acc);font-weight:600}
+.tab span{font-size:11.5px;background:var(--line);padding:1px 7px;border-radius:10px;margin-left:5px}
+.ctl{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.ctl input,.ctl select{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:13.5px;color:var(--ink)}
+.ctl input{flex:1;min-width:220px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:5px 10px;border-radius:20px;background:var(--ink);color:#fff;cursor:pointer}
+.meta{font-size:13px;color:var(--mute);margin-bottom:10px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:9px;transition:border-color .2s;animation:in .3s ease}
+@keyframes in{from{opacity:0;transform:translateY(4px)}}
+.item:hover{border-color:#c9d2df}
+.row1{display:flex;gap:10px;align-items:flex-start}
+.jb{font-size:11px;font-weight:700;padding:3px 7px;border-radius:5px;background:#eef3f8;color:var(--ink2);white-space:nowrap;margin-top:2px}
+.ti{font-size:15.5px;font-weight:600;flex:1;cursor:pointer}.ti:hover{color:var(--acc)}
+.dt{font-size:12px;color:var(--mute);white-space:nowrap}
+.au{font-size:13px;color:var(--mute);margin:4px 0 7px 0}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tg{font-size:11.5px;padding:2px 8px;border-radius:12px;border:1px solid var(--line);color:var(--ink2)}
+.tg.t{border:0;color:#fff;background:var(--c)}
+.ab{font-size:13.5px;color:var(--ink2);margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);display:none}
+.item.open .ab{display:block}
+.empty{text-align:center;color:var(--mute);padding:40px}
+.warn{background:#fff6e5;border:1px solid #f1d9a8;color:#7a5410;font-size:13px;padding:10px 12px;border-radius:8px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:13.5px}
+th{text-align:left;background:#eef3f8;padding:10px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2)}
+td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+.cov{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;font-size:13.5px;color:var(--ink2)}.cov b{color:var(--ink)}
+footer{border-top:1px solid var(--line);padding:24px 0;color:var(--mute);font-size:12.5px;margin-top:20px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:13.5px;transition:transform .3s}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:640px){.row1{flex-wrap:wrap}.dt{width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo"><div class="mark">CF</div><div><b class="serif">Corporate Finance Updates</b><small>Bi-weekly research digest</small></div></div>
+      <nav class="links">
+        <a id="lnk-conf" href="#" target="_blank" rel="noopener">Post a conference</a>
+        <a id="lnk-job" href="#" target="_blank" rel="noopener">Post a job</a>
+        <a href="#coverage">Coverage</a>
+      </nav>
+    </div>
+    <div class="hero">
+      <h1 class="serif">New corporate finance research, <em>every two weeks</em>, organised by the risks firms actually face.</h1>
+      <p>Online-first articles from leading finance journals, new SSRN working papers, conferences and jobs, tagged by classic area and by emerging theme: climate uncertainty, biodiversity, cybersecurity, crypto, political geography and more.</p>
+      <form class="sub" name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return subscribe(event)">
+        <input type="hidden" name="form-name" value="subscribe">
+        <p hidden><label>Leave empty: <input name="bot-field"></label></p>
+        <input name="email" type="email" required placeholder="you@university.edu">
+        <button type="submit">Subscribe</button>
+      </form>
+      <div class="stats" id="stats"></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <h2 class="serif">Theme radar</h2>
+    <p class="hint" id="period"></p>
+    <div class="radar" id="radar"></div>
+  </section>
+  <section style="padding-top:0">
+    <div class="tabs" id="tabs"></div>
+    <div id="panel"><div class="empty">Loading…</div></div>
+  </section>
+  <section id="coverage">
+    <h2 class="serif">Coverage</h2>
+    <div class="cov" id="cov"></div>
+  </section>
+</main>
+<footer><div class="wrap">Corporate Finance Updates · No guarantee of completeness · Papers are collected automatically from Crossref and theme-tagged by keyword rules; conferences and jobs are community submissions reviewed before publication.</div></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+// ───────────────────────────────────────────────────────────────────────
+// CONFIGURE ONCE. Conferences & jobs come from a Google Sheet.
+//  SHEETS: the "Publish to web → CSV" link of each PUBLIC tab
+//  FORMS : the Google Form links shown as "Post a conference / Post a job"
+const SHEETS={
+  conferences:"",  // https://docs.google.com/spreadsheets/d/e/2PACX-…/pub?gid=…&single=true&output=csv
+  jobs:""          // https://docs.google.com/spreadsheets/d/e/2PACX-…/pub?gid=…&single=true&output=csv
+};
+const FORMS={
+  conference:"",   // https://docs.google.com/forms/d/e/…/viewform
+  job:""           // https://docs.google.com/forms/d/e/…/viewform
+};
+// ───────────────────────────────────────────────────────────────────────
+
+let D={generated:null,window:null,journals:{},themes:{},areas:[],pubs:[],ssrn:[],error:""};
+let M={conferences:[],jobs:[],confStatus:"unset",jobStatus:"unset"};
+let S={tab:"pubs",q:"",j:"",a:"",th:"",sort:"date"};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const safe=u=>/^https?:\/\//i.test(u||"")?u:"";
+const bust=u=>u+"?v="+Math.floor(Date.now()/6e5);
+const today=new Date().toISOString().slice(0,10);
+const period=()=>D.window?`${D.window.from} to ${D.window.to}`:"no data yet";
+
+/* ---- Google Sheet helpers ---- */
+function parseCSV(text){
+  const rows=[];let row=[],f="",q=false;
+  text=text.replace(/^\uFEFF/,"");
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
+    else if(c==='"')q=true;
+    else if(c===','){row.push(f);f="";}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f="";}
+    else f+=c;
+  }
+  if(f.length||row.length){row.push(f);rows.push(row);}
+  const head=(rows.shift()||[]).map(h=>h.trim().toLowerCase());
+  return rows.filter(r=>r.some(v=>v.trim())).map(r=>Object.fromEntries(head.map((h,i)=>[h,(r[i]||"").trim()])));
+}
+function iso(s){  // accepts 2026-11-15, 15/11/2026 (day/month/year), or anything Date() understands
+  s=(s||"").trim();if(!s)return "";
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
+  m=s.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})/);if(m)return `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;
+  const d=new Date(s);return isNaN(d)?"":d.toISOString().slice(0,10);
+}
+async function sheet(url){
+  if(!url)return{status:"unset",rows:[]};
+  try{const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return{status:"ok",rows:parseCSV(await r.text())};}
+  catch(e){return{status:"error",rows:[]};}
+}
+const col=(o,...names)=>{for(const n of names){const v=o[n.toLowerCase()];if(v)return v;}return "";};
+const themeKey=name=>Object.keys(D.themes).find(k=>D.themes[k].n.toLowerCase()===String(name||"").trim().toLowerCase())||"";
+const liveConfs=()=>M.conferences.filter(c=>{const end=c.end||c.date;return !end||end>=today;});
+const liveJobs=()=>M.jobs.filter(j=>!j.deadline||j.deadline>=today);
+
+/* ---- load everything ---- */
+async function load(){
+  try{const r=await fetch(bust("data.json"));if(!r.ok)throw new Error("HTTP "+r.status);Object.assign(D,await r.json());}
+  catch(e){D.error="Could not load data.json ("+e.message+"). Run the “Update research listings” workflow in the GitHub Actions tab to generate it.";}
+  const [c,j]=await Promise.all([sheet(SHEETS.conferences),sheet(SHEETS.jobs)]);
+  M.confStatus=c.status;M.jobStatus=j.status;
+  M.conferences=c.rows.map(o=>({
+    name:col(o,"event name","name"),organiser:col(o,"organiser","organizer"),location:col(o,"location"),
+    date:iso(col(o,"start date","date")),end:iso(col(o,"end date")),deadline:iso(col(o,"submission deadline","deadline")),
+    url:safe(col(o,"website","url","link")),theme:col(o,"theme")
+  })).filter(x=>x.name);
+  M.jobs=j.rows.map(o=>({
+    institution:col(o,"institution"),position:col(o,"position title","position"),field:col(o,"field"),
+    location:col(o,"location","region"),deadline:iso(col(o,"application deadline","deadline")),url:safe(col(o,"link to posting","link","url"))
+  })).filter(x=>x.institution||x.position);
+  for(const [id,u] of [["lnk-conf",FORMS.conference],["lnk-job",FORMS.job]]){if(safe(u))$(id).href=u;else $(id).hidden=true;}
+  stats();radar();render();cov();
+}
+
+/* ---- rendering ---- */
+function stats(){
+  $("stats").innerHTML=[[D.pubs.length,"Journal articles"],[D.ssrn.length,"SSRN papers"],[liveConfs().length,"Conferences"],[liveJobs().length,"Job openings"]]
+    .map(([n,l])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
+  $("period").textContent=D.window?`Share of new papers per theme, ${period()}. Click a theme to filter.`:"Theme counts appear after the first update has run.";
+}
+function radar(){
+  const all=[...D.pubs,...D.ssrn],keys=Object.keys(D.themes);
+  const max=Math.max(1,...keys.map(k=>all.filter(p=>p.th.includes(k)).length));
+  $("radar").innerHTML=keys.map(k=>{const t=D.themes[k],n=all.filter(p=>p.th.includes(k)).length;
+    return `<div class="tc ${S.th===k?"on":""}" style="--c:${esc(t.c)}" onclick="setTheme('${k}')">
+      <div class="th"><b>${esc(t.n)}</b><span class="cnt">${n}</span></div>
+      <div class="td">${esc(t.d)}</div><div class="bar"><i style="width:${n/max*100}%"></i></div></div>`}).join("");
+}
+function setTheme(k){S.th=S.th===k?"":k;if(S.tab!=="pubs"&&S.tab!=="ssrn")S.tab="pubs";radar();render()}
+function filt(list){
+  const q=S.q.toLowerCase();
+  const r=list.filter(p=>(!S.j||p.j===S.j)&&(!S.a||p.a===S.a)&&(!S.th||p.th.includes(S.th))&&(!q||(p.t+" "+p.ab+" "+p.au).toLowerCase().includes(q)));
+  return r.sort((x,y)=>S.sort==="date"?y.d.localeCompare(x.d):S.sort==="journal"?x.j.localeCompare(y.j):x.t.localeCompare(y.t));
+}
+function tabs(){
+  const T=[["pubs","Publications",D.pubs.length],["ssrn","SSRN",D.ssrn.length],["conf","Conferences",liveConfs().length],["jobs","Jobs",liveJobs().length]];
+  $("tabs").innerHTML=T.map(([k,l,n])=>`<button class="tab ${S.tab===k?"on":""}" onclick="S.tab='${k}';render()">${l}<span>${n}</span></button>`).join("");
+}
+function controls(isPub){
+  return `<div class="ctl">
+    <input placeholder="Search titles, abstracts, authors…" value="${esc(S.q)}" oninput="S.q=this.value;list()">
+    ${isPub?`<select onchange="S.j=this.value;list()"><option value="">All journals</option>${Object.keys(D.journals).map(k=>`<option ${S.j===k?"selected":""} value="${k}">${k}</option>`).join("")}</select>`:""}
+    <select onchange="S.a=this.value;list()"><option value="">All areas</option>${[...D.areas,"General"].map(a=>`<option ${S.a===a?"selected":""}>${esc(a)}</option>`).join("")}</select>
+    <select onchange="S.sort=this.value;list()"><option value="date">Newest first</option><option value="journal" ${S.sort==="journal"?"selected":""}>By journal</option><option value="title" ${S.sort==="title"?"selected":""}>By title</option></select>
+    ${S.th&&D.themes[S.th]?`<span class="chip" onclick="setTheme('${S.th}')">${esc(D.themes[S.th].n)} ✕</span>`:""}
+  </div><div class="meta" id="meta"></div><div id="list"></div>`;
+}
+function list(){
+  const src=S.tab==="pubs"?D.pubs:D.ssrn,r=filt(src);
+  $("meta").textContent=`${r.length} of ${src.length} ${S.tab==="pubs"?"online-first articles":"working papers"} · ${period()}`;
+  $("list").innerHTML=r.length?r.map(p=>`<div class="item" onclick="this.classList.toggle('open')">
+    <div class="row1"><span class="jb" title="${esc(D.journals[p.j]||"SSRN")}">${esc(p.j)}</span><span class="ti">${esc(p.t)}</span><span class="dt">${esc(p.d)}</span></div>
+    <div class="au">${esc(p.au)}</div>
+    <div class="tags"><span class="tg">${esc(p.a)}</span>${p.th.filter(k=>D.themes[k]).map(k=>`<span class="tg t" style="--c:${esc(D.themes[k].c)}">${esc(D.themes[k].n)}</span>`).join("")}</div>
+    <div class="ab">${esc(p.ab)||"<i>No abstract available.</i>"} <a href="${esc(p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open paper →</a></div>
+  </div>`).join(""):`<div class="empty">${src.length?"No entries match these filters.":"No listings yet. Run the update workflow in GitHub Actions."}</div>`;
+}
+const themeTag=name=>{const k=themeKey(name);return k?`<span class="tg t" style="--c:${esc(D.themes[k].c)}">${esc(D.themes[k].n)}</span>`:"General";};
+const sheetMsg=(status,what)=>status==="unset"?`${what} listings are not connected yet: paste the published CSV link into index.html.`
+  :status==="error"?`Could not load the ${what.toLowerCase()} sheet. Check that the tab is published to the web and the link ends with output=csv.`
+  :`No upcoming ${what.toLowerCase()} listed yet. Submissions appear here once approved.`;
+function render(){
+  tabs();
+  const warn=D.error?`<div class="warn">${esc(D.error)}</div>`:"";
+  if(S.tab==="pubs"||S.tab==="ssrn"){$("panel").innerHTML=warn+controls(S.tab==="pubs");list();return}
+  if(S.tab==="conf"){
+    const rows=liveConfs().sort((a,b)=>(a.date||"9").localeCompare(b.date||"9"));
+    $("panel").innerHTML=warn+(rows.length?`<table><tr><th>Event</th><th>Organiser</th><th>Location</th><th>Dates</th><th>Submission deadline</th><th>Theme</th></tr>${rows.map(c=>`<tr>
+      <td><b>${c.url?`<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.name)}</a>`:esc(c.name)}</b></td>
+      <td>${esc(c.organiser)}</td><td>${esc(c.location)}</td>
+      <td>${esc(c.date)}${c.end&&c.end!==c.date?" – "+esc(c.end):""}</td>
+      <td>${esc(c.deadline)||"—"}</td><td>${themeTag(c.theme)}</td></tr>`).join("")}</table>`
+      :`<div class="empty">${esc(sheetMsg(M.confStatus,"Conference"))}</div>`);
+  }else{
+    const rows=liveJobs().sort((a,b)=>(a.deadline||"9").localeCompare(b.deadline||"9"));
+    $("panel").innerHTML=warn+(rows.length?`<table><tr><th>Institution</th><th>Position</th><th>Field</th><th>Location</th><th>Deadline</th></tr>${rows.map(j=>`<tr>
+      <td>${esc(j.institution)}</td>
+      <td><b>${j.url?`<a href="${esc(j.url)}" target="_blank" rel="noopener">${esc(j.position)}</a>`:esc(j.position)}</b></td>
+      <td>${esc(j.field)}</td><td>${esc(j.location)}</td><td>${esc(j.deadline)||"—"}</td></tr>`).join("")}</table>`
+      :`<div class="empty">${esc(sheetMsg(M.jobStatus,"Job"))}</div>`);
+  }
+}
+function cov(){
+  const js=Object.entries(D.journals).map(([k,v])=>`${esc(v)} (${k})`).join(", ");
+  $("cov").innerHTML=`<p><b>Journals included:</b> ${js||"—"}. No guarantee of completeness.</p>
+  <p style="margin-top:10px"><b>SSRN:</b> new working papers whose DOI was registered by SSRN in the period and whose title matches corporate-finance keywords. Abstracts are usually unavailable for SSRN entries, so treat the SSRN list as approximate.</p>
+  <p style="margin-top:10px"><b>Theme tagging:</b> each paper is matched against keyword dictionaries for ${Object.values(D.themes).map(t=>esc(t.n)).join(", ")||"—"}, and assigned one classic area (${D.areas.map(esc).join(", ")||"—"}).</p>
+  <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community through the forms linked at the top and reviewed before they appear. Past events and expired deadlines drop off automatically.</p>
+  <p style="margin-top:10px"><b>Last paper update:</b> ${esc(D.generated)||"never"}.</p>`;
+}
+async function subscribe(e){
+  e.preventDefault();const f=e.target;
+  try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(f)).toString()});
+    toast(r.ok?"Thanks! You're on the list.":"Something went wrong. Please try again.");if(r.ok)f.reset();}
+  catch(_){toast("Network error. Please try again.");}
+  return false;
+}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600)}
+load();
+</script>
+</body>
+</html>
