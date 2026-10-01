@@ -102,7 +102,7 @@ dialog input,dialog select{padding:9px 11px;border:1px solid var(--line);border-
     <div class="hero">
       <h1 class="serif">New corporate finance research, <em>every two weeks</em>, organised by the risks firms actually face.</h1>
       <p>Online-first articles from leading finance journals, new SSRN working papers, conferences and jobs, tagged by classic area and by emerging theme: climate uncertainty, biodiversity, cybersecurity, crypto, political geography and more.</p>
-      <form class="sub" name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return subscribe(event)">
+      <form class="sub" name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="subscribeEmail(event);return false">
         <input type="hidden" name="form-name" value="subscribe">
         <p hidden><label>Leave empty: <input name="bot-field"></label></p>
         <input name="email" type="email" required placeholder="you@university.edu">
@@ -131,7 +131,7 @@ dialog input,dialog select{padding:9px 11px;border:1px solid var(--line);border-
 <footer><div class="wrap">Corporate Finance Updates · No guarantee of completeness · Papers are collected automatically from Crossref and theme-tagged by keyword rules; conferences and jobs are community submissions reviewed before publication.</div></footer>
 
 <dialog id="dlg-conf">
-  <form name="conference" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return sendForm(event,'dlg-conf')">
+  <form name="conference" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="sendForm(event,'dlg-conf');return false">
     <h3 class="serif">Post a conference</h3>
     <input type="hidden" name="form-name" value="conference">
     <p hidden><label>Leave empty: <input name="bot-field"></label></p>
@@ -150,7 +150,7 @@ dialog input,dialog select{padding:9px 11px;border:1px solid var(--line);border-
   </form>
 </dialog>
 <dialog id="dlg-job">
-  <form name="job" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return sendForm(event,'dlg-job')">
+  <form name="job" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="sendForm(event,'dlg-job');return false">
     <h3 class="serif">Post a job</h3>
     <input type="hidden" name="form-name" value="job">
     <p hidden><label>Leave empty: <input name="bot-field"></label></p>
@@ -283,10 +283,10 @@ function cov(){
   <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community through the “Post a conference” and “Post a job” forms at the top and reviewed before they appear. Past events and expired deadlines drop off automatically.</p>
   <p style="margin-top:10px"><b>Last paper update:</b> ${esc(D.generated)||"never"}.</p>`;
 }
-async function subscribe(e){
+async function subscribeEmail(e){
   e.preventDefault();const f=e.target;
   try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(f)).toString()});
-    toast(r.ok?"Thanks! You're on the list.":"Something went wrong. Please try again.");if(r.ok)f.reset();}
+    toast(r.ok?"Thanks! You're on the list.":"Could not subscribe (HTTP "+r.status+"). Please try again later.");if(r.ok)f.reset();}
   catch(_){toast("Network error. Please try again.");}
   return false;
 }
@@ -294,7 +294,7 @@ function openDlg(id){const d=$(id);if(d.showModal)d.showModal();else d.setAttrib
 async function sendForm(e,id){
   e.preventDefault();const f=e.target;
   try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(f)).toString()});
-    if(r.ok){toast("Thanks! Your submission will appear once reviewed.");f.reset();$(id).close();}else toast("Something went wrong. Please try again.");}
+    if(r.ok){toast("Thanks! Your submission will appear once reviewed.");f.reset();$(id).close();}else toast("Could not submit (HTTP "+r.status+"). Please try again later.");}
   catch(_){toast("Network error. Please try again.");}
   return false;
 }
