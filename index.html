@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Corporate Finance Research Updates</title>
 <meta name="description" content="Bi-weekly digest of new corporate finance research, tagged by classic area and by emerging themes: climate, biodiversity, cybersecurity, crypto, geopolitics, AI and supply chains.">
+<meta name="author" content="Efstathios Magerakis">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Corporate Finance Research Updates">
+<meta property="og:description" content="Bi-weekly digest of new corporate finance research, curated by Efstathios Magerakis (smagerakis.gr).">
 <style>
 :root{--ink:#0f1b2d;--ink2:#2b3a52;--mute:#6b7a90;--line:#e3e7ee;--bg:#f7f6f2;--card:#fff;--acc:#0e7c66;--acc2:#c8862a}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -19,6 +23,8 @@ header::after{content:"";position:absolute;right:-120px;top:-140px;width:460px;h
 .logo{display:flex;align-items:center;gap:12px}
 .mark{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:800;font-size:15px}
 .logo b{font-size:19px}.logo small{display:block;color:#9fb0c7;font-size:12px}
+.logo small a{color:#7fe0c6}
+footer a{color:var(--ink2);text-decoration:underline}
 .links{display:flex;gap:18px;font-size:13.5px}.links a{color:#cfe0f5}
 .hero{padding:34px 0 40px;position:relative;z-index:1}
 .hero h1{font-size:clamp(28px,4vw,44px);font-weight:600;line-height:1.15;max-width:760px}
@@ -92,7 +98,7 @@ dialog input,dialog select{padding:9px 11px;border:1px solid var(--line);border-
 <header>
   <div class="wrap">
     <div class="top">
-      <div class="logo"><div class="mark">CF</div><div><b class="serif">Corporate Finance Updates</b><small>Bi-weekly research digest</small></div></div>
+      <div class="logo"><div class="mark">CF</div><div><b class="serif">Corporate Finance Updates</b><small>Bi-weekly research digest · Curated by <a href="https://smagerakis.gr" target="_blank" rel="noopener">Efstathios Magerakis</a></small></div></div>
       <nav class="links">
         <a href="#" onclick="return openDlg('dlg-conf')">Post a conference</a>
         <a href="#" onclick="return openDlg('dlg-job')">Post a job</a>
@@ -128,7 +134,7 @@ dialog input,dialog select{padding:9px 11px;border:1px solid var(--line);border-
     <div class="cov" id="cov"></div>
   </section>
 </main>
-<footer><div class="wrap">Corporate Finance Updates · No guarantee of completeness · Papers are collected automatically from Crossref and theme-tagged by keyword rules; conferences and jobs are community submissions reviewed before publication.</div></footer>
+<footer><div class="wrap">Corporate Finance Updates, curated by <a href="https://smagerakis.gr" target="_blank" rel="noopener">Efstathios Magerakis</a> · No guarantee of completeness · Papers are collected automatically from Crossref and theme-tagged by keyword rules; conferences and jobs are community submissions reviewed before publication.</div></footer>
 
 <dialog id="dlg-conf">
   <form name="conference" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="sendForm(event,'dlg-conf');return false">

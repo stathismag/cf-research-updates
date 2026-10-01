@@ -64,7 +64,7 @@ def build(data, papers):
     other = [p for p in rest if p.get("a") not in data.get("areas", [])]
     if other:
         parts.append("## Other\n\n" + "\n\n".join(entry(p, journals) for p in other))
-    parts.append(f"---\n\nBrowse, filter and search everything at [{SITE.split('//')[-1]}]({SITE}).")
+    parts.append(f"---\n\nBrowse, filter and search everything at [{SITE.split('//')[-1]}]({SITE}).\n\nCurated by [Efstathios Magerakis](https://smagerakis.gr).")
     return subject, "\n\n".join(parts)
 
 
