@@ -301,6 +301,7 @@ function subscribeEmail(e){
     .catch(()=>toast("Network error. Please try again."));
   return false;
 }
+function openDlg(id){const d=$(id);if(d.showModal)d.showModal();else d.setAttribute("open","");return false}
 async function sendForm(e,id){
   e.preventDefault();const f=e.target;
   try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(f)).toString()});
