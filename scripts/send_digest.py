@@ -90,8 +90,11 @@ def main():
         print("BUTTONDOWN_API_KEY is not set; skipping the email (data.json is still updated).")
         return 0
 
-    r = requests.post(API, timeout=60,
-                      headers={"Authorization": f"Token {key}", "Content-Type": "application/json"},
+    headers = {"Authorization": f"Token {key}", "Content-Type": "application/json"}
+    if not args.draft:
+        # Buttondown refuses to send immediately unless this header is present (once per API key).
+        headers["X-Buttondown-Live-Dangerously"] = "true"
+    r = requests.post(API, timeout=60, headers=headers,
                       json={"subject": subject, "body": body, "status": "draft" if args.draft else "about_to_send"})
     if r.status_code >= 300:
         print(f"Buttondown rejected the email: HTTP {r.status_code}\n{r.text[:800]}", file=sys.stderr)

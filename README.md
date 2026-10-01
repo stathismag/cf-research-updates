@@ -53,7 +53,9 @@ One-time setup:
 The first run emails every paper currently in `data.json`. To start from the next update instead, put the current
 `url` values into `sent.json` first. Preview the email locally with `python scripts/send_digest.py --dry-run`; use
 `--draft` to save it in Buttondown for review instead of sending (add it to the workflow step to review before each send).
-If Buttondown rejects a send, the step fails (red run) but `data.json` is still committed.
+If Buttondown rejects a send, the run fails (red) and nothing is saved, so the next run retries the same papers.
+To re-fetch a longer period by hand, run the workflow with the **days** box set (e.g. `14`); a plain run only covers
+the time since the previous run, so running it twice in one day leaves a very short list.
 
 ## Conferences and jobs
 

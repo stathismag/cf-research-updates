@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: "0 6 1,15 * *"   # 06:00 UTC on the 1st and 15th of every month
   workflow_dispatch:         # also lets you run it by hand from the Actions tab
+    inputs:
+      days:
+        description: "Optional: look back this many days instead of since the last run (e.g. 14)"
+        required: false
+        default: ""
+
+concurrency:                 # never run two updates at once (they would overwrite each other)
+  group: update-listings
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -26,7 +35,9 @@ jobs:
         run: python scripts/fetch_papers.py --check
 
       - name: Fetch new papers
-        run: python scripts/fetch_papers.py
+        run: python scripts/fetch_papers.py ${DAYS:+--days "$DAYS"}
+        env:
+          DAYS: ${{ inputs.days }}
 
       - name: Email the digest to subscribers
         run: python scripts/send_digest.py
@@ -34,7 +45,6 @@ jobs:
           BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
 
       - name: Commit data.json if it changed
-        if: ${{ !cancelled() }}   # keep the site data even if the email step failed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -43,5 +53,6 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Update listings $(date -u +%Y-%m-%d)"
+            git pull --rebase origin main
             git push
           fi
