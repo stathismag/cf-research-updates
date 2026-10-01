@@ -47,7 +47,7 @@ One-time setup:
 1. Create a Buttondown account at https://buttondown.com and note your username (buttondown.com/USERNAME).
 2. Buttondown → Settings → API → copy the API key.
 3. Repo → Settings → Secrets and variables → Actions → New repository secret: `BUTTONDOWN_API_KEY` = that key.
-4. In `index.html`, set `const NEWSLETTER="USERNAME";` and commit. Until then, signups only go to Netlify Forms.
+4. In `index.html`, set `const NEWSLETTER="USERNAME";` and commit. Until then, signups only go to Netlify Forms. (Currently set to `cf-research-updates`.)
 5. Run the workflow once from the Actions tab. The log's "Email the digest" step says `Sent '…' with N papers`.
 
 The first run emails every paper currently in `data.json`. To start from the next update instead, put the current
