@@ -74,7 +74,18 @@ td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
 footer{border-top:1px solid var(--line);padding:24px 0;color:var(--mute);font-size:12.5px;margin-top:20px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:13.5px;transition:transform .3s}
 .toast.show{transform:translateX(-50%) translateY(0)}
-@media(max-width:640px){.row1{flex-wrap:wrap}.dt{width:100%}}
+dialog{margin:auto;border:0;border-radius:14px;padding:0;width:min(520px,92vw);box-shadow:0 20px 60px rgba(15,27,45,.35);color:var(--ink)}
+dialog::backdrop{background:rgba(15,27,45,.55)}
+dialog form{padding:22px;display:grid;gap:10px}
+dialog h3{font-size:19px;font-weight:600}
+dialog label{font-size:12.5px;color:var(--mute);display:grid;gap:4px}
+dialog input,dialog select{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:14px;color:var(--ink);background:#fff;font-family:inherit}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dact{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.dact button{padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:14px}
+.dact button[type=submit]{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.note{font-size:12px;color:var(--mute)}
+@media(max-width:640px){.dgrid{grid-template-columns:1fr}.row1{flex-wrap:wrap}.dt{width:100%}}
 </style>
 </head>
 <body>
@@ -83,8 +94,8 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:var(--mute);font-si
     <div class="top">
       <div class="logo"><div class="mark">CF</div><div><b class="serif">Corporate Finance Updates</b><small>Bi-weekly research digest</small></div></div>
       <nav class="links">
-        <a id="lnk-conf" href="#" target="_blank" rel="noopener">Post a conference</a>
-        <a id="lnk-job" href="#" target="_blank" rel="noopener">Post a job</a>
+        <a href="#" onclick="return openDlg('dlg-conf')">Post a conference</a>
+        <a href="#" onclick="return openDlg('dlg-job')">Post a job</a>
         <a href="#coverage">Coverage</a>
       </nav>
     </div>
@@ -118,25 +129,50 @@ footer{border-top:1px solid var(--line);padding:24px 0;color:var(--mute);font-si
   </section>
 </main>
 <footer><div class="wrap">Corporate Finance Updates · No guarantee of completeness · Papers are collected automatically from Crossref and theme-tagged by keyword rules; conferences and jobs are community submissions reviewed before publication.</div></footer>
+
+<dialog id="dlg-conf">
+  <form name="conference" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return sendForm(event,'dlg-conf')">
+    <h3 class="serif">Post a conference</h3>
+    <input type="hidden" name="form-name" value="conference">
+    <p hidden><label>Leave empty: <input name="bot-field"></label></p>
+    <label>Event name<input name="event_name" required></label>
+    <div class="dgrid">
+      <label>Organiser<input name="organiser"></label>
+      <label>Location<input name="location"></label>
+      <label>Start date<input name="start_date" type="date" required></label>
+      <label>End date<input name="end_date" type="date"></label>
+      <label>Submission deadline<input name="submission_deadline" type="date"></label>
+      <label>Theme<select name="theme"><option>General</option><option>Climate Uncertainty</option><option>Biodiversity &amp; Nature</option><option>Cybersecurity</option><option>Crypto &amp; Digital Assets</option><option>Political Geography</option><option>AI &amp; Technology</option><option>Supply Chains &amp; Trade</option><option>ESG &amp; Sustainability</option></select></label>
+    </div>
+    <label>Website<input name="website" type="url" placeholder="https://"></label>
+    <p class="note">Submissions are reviewed before they appear on the site.</p>
+    <div class="dact"><button type="button" onclick="this.closest('dialog').close()">Cancel</button><button type="submit">Submit</button></div>
+  </form>
+</dialog>
+<dialog id="dlg-job">
+  <form name="job" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return sendForm(event,'dlg-job')">
+    <h3 class="serif">Post a job</h3>
+    <input type="hidden" name="form-name" value="job">
+    <p hidden><label>Leave empty: <input name="bot-field"></label></p>
+    <label>Institution<input name="institution" required></label>
+    <label>Position title<input name="position_title" required></label>
+    <div class="dgrid">
+      <label>Field<input name="field"></label>
+      <label>Location<input name="location"></label>
+    </div>
+    <label>Application deadline<input name="application_deadline" type="date"></label>
+    <label>Link to posting<input name="link_to_posting" type="url" placeholder="https://"></label>
+    <p class="note">Submissions are reviewed before they appear on the site.</p>
+    <div class="dact"><button type="button" onclick="this.closest('dialog').close()">Cancel</button><button type="submit">Submit</button></div>
+  </form>
+</dialog>
 <div class="toast" id="toast"></div>
 
 <script>
-// ───────────────────────────────────────────────────────────────────────
-// CONFIGURE ONCE. Conferences & jobs come from a Google Sheet.
-//  SHEETS: the "Publish to web → CSV" link of each PUBLIC tab
-//  FORMS : the Google Form links shown as "Post a conference / Post a job"
-const SHEETS={
-  conferences:"",  // https://docs.google.com/spreadsheets/d/e/2PACX-…/pub?gid=…&single=true&output=csv
-  jobs:""          // https://docs.google.com/spreadsheets/d/e/2PACX-…/pub?gid=…&single=true&output=csv
-};
-const FORMS={
-  conference:"",   // https://docs.google.com/forms/d/e/…/viewform
-  job:""           // https://docs.google.com/forms/d/e/…/viewform
-};
-// ───────────────────────────────────────────────────────────────────────
+// Conferences and jobs live in conferences.json and jobs.json (see README). Submissions arrive via Netlify Forms.
 
 let D={generated:null,window:null,journals:{},themes:{},areas:[],pubs:[],ssrn:[],error:""};
-let M={conferences:[],jobs:[],confStatus:"unset",jobStatus:"unset"};
+let M={conferences:[],jobs:[],confStatus:"ok",jobStatus:"ok"};
 let S={tab:"pubs",q:"",j:"",a:"",th:"",sort:"date"};
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -145,34 +181,11 @@ const bust=u=>u+"?v="+Math.floor(Date.now()/6e5);
 const today=new Date().toISOString().slice(0,10);
 const period=()=>D.window?`${D.window.from} to ${D.window.to}`:"no data yet";
 
-/* ---- Google Sheet helpers ---- */
-function parseCSV(text){
-  const rows=[];let row=[],f="",q=false;
-  text=text.replace(/^\uFEFF/,"");
-  for(let i=0;i<text.length;i++){
-    const c=text[i];
-    if(q){if(c==='"'){if(text[i+1]==='"'){f+='"';i++;}else q=false;}else f+=c;}
-    else if(c==='"')q=true;
-    else if(c===','){row.push(f);f="";}
-    else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(f);rows.push(row);row=[];f="";}
-    else f+=c;
-  }
-  if(f.length||row.length){row.push(f);rows.push(row);}
-  const head=(rows.shift()||[]).map(h=>h.trim().toLowerCase());
-  return rows.filter(r=>r.some(v=>v.trim())).map(r=>Object.fromEntries(head.map((h,i)=>[h,(r[i]||"").trim()])));
-}
-function iso(s){  // accepts 2026-11-15, 15/11/2026 (day/month/year), or anything Date() understands
-  s=(s||"").trim();if(!s)return "";
-  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);if(m)return `${m[1]}-${m[2].padStart(2,"0")}-${m[3].padStart(2,"0")}`;
-  m=s.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})/);if(m)return `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`;
-  const d=new Date(s);return isNaN(d)?"":d.toISOString().slice(0,10);
-}
-async function sheet(url){
-  if(!url)return{status:"unset",rows:[]};
-  try{const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(r.status);return{status:"ok",rows:parseCSV(await r.text())};}
+/* ---- listings (conferences.json / jobs.json) ---- */
+async function listing(file){
+  try{const r=await fetch(bust(file),{cache:"no-store"});if(!r.ok)throw new Error(r.status);const j=await r.json();return{status:"ok",rows:Array.isArray(j)?j:[]};}
   catch(e){return{status:"error",rows:[]};}
 }
-const col=(o,...names)=>{for(const n of names){const v=o[n.toLowerCase()];if(v)return v;}return "";};
 const themeKey=name=>Object.keys(D.themes).find(k=>D.themes[k].n.toLowerCase()===String(name||"").trim().toLowerCase())||"";
 const liveConfs=()=>M.conferences.filter(c=>{const end=c.end||c.date;return !end||end>=today;});
 const liveJobs=()=>M.jobs.filter(j=>!j.deadline||j.deadline>=today);
@@ -181,18 +194,17 @@ const liveJobs=()=>M.jobs.filter(j=>!j.deadline||j.deadline>=today);
 async function load(){
   try{const r=await fetch(bust("data.json"));if(!r.ok)throw new Error("HTTP "+r.status);Object.assign(D,await r.json());}
   catch(e){D.error="Could not load data.json ("+e.message+"). Run the “Update research listings” workflow in the GitHub Actions tab to generate it.";}
-  const [c,j]=await Promise.all([sheet(SHEETS.conferences),sheet(SHEETS.jobs)]);
+  const [c,j]=await Promise.all([listing("conferences.json"),listing("jobs.json")]);
   M.confStatus=c.status;M.jobStatus=j.status;
   M.conferences=c.rows.map(o=>({
-    name:col(o,"event name","name"),organiser:col(o,"organiser","organizer"),location:col(o,"location"),
-    date:iso(col(o,"start date","date")),end:iso(col(o,"end date")),deadline:iso(col(o,"submission deadline","deadline")),
-    url:safe(col(o,"website","url","link")),theme:col(o,"theme")
+    name:o.name||"",organiser:o.organiser||"",location:o.location||"",
+    date:o.start_date||"",end:o.end_date||"",deadline:o.submission_deadline||"",
+    url:safe(o.website),theme:o.theme||""
   })).filter(x=>x.name);
   M.jobs=j.rows.map(o=>({
-    institution:col(o,"institution"),position:col(o,"position title","position"),field:col(o,"field"),
-    location:col(o,"location","region"),deadline:iso(col(o,"application deadline","deadline")),url:safe(col(o,"link to posting","link","url"))
+    institution:o.institution||"",position:o.position||"",field:o.field||"",
+    location:o.location||"",deadline:o.application_deadline||"",url:safe(o.link)
   })).filter(x=>x.institution||x.position);
-  for(const [id,u] of [["lnk-conf",FORMS.conference],["lnk-job",FORMS.job]]){if(safe(u))$(id).href=u;else $(id).hidden=true;}
   stats();radar();render();cov();
 }
 
@@ -240,9 +252,8 @@ function list(){
   </div>`).join(""):`<div class="empty">${src.length?"No entries match these filters.":"No listings yet. Run the update workflow in GitHub Actions."}</div>`;
 }
 const themeTag=name=>{const k=themeKey(name);return k?`<span class="tg t" style="--c:${esc(D.themes[k].c)}">${esc(D.themes[k].n)}</span>`:"General";};
-const sheetMsg=(status,what)=>status==="unset"?`${what} listings are not connected yet: paste the published CSV link into index.html.`
-  :status==="error"?`Could not load the ${what.toLowerCase()} sheet. Check that the tab is published to the web and the link ends with output=csv.`
-  :`No upcoming ${what.toLowerCase()} listed yet. Submissions appear here once approved.`;
+const sheetMsg=(status,what)=>status==="error"?`Could not load the ${what.toLowerCase()} listings. Please try again later.`
+  :`No upcoming ${what.toLowerCase()} listed yet. Use “Post a ${what.toLowerCase()}” at the top to submit one.`;
 function render(){
   tabs();
   const warn=D.error?`<div class="warn">${esc(D.error)}</div>`:"";
@@ -269,13 +280,21 @@ function cov(){
   $("cov").innerHTML=`<p><b>Journals included:</b> ${js||"—"}. No guarantee of completeness.</p>
   <p style="margin-top:10px"><b>SSRN:</b> new working papers whose DOI was registered by SSRN in the period and whose title matches corporate-finance keywords. Abstracts are usually unavailable for SSRN entries, so treat the SSRN list as approximate.</p>
   <p style="margin-top:10px"><b>Theme tagging:</b> each paper is matched against keyword dictionaries for ${Object.values(D.themes).map(t=>esc(t.n)).join(", ")||"—"}, and assigned one classic area (${D.areas.map(esc).join(", ")||"—"}).</p>
-  <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community through the forms linked at the top and reviewed before they appear. Past events and expired deadlines drop off automatically.</p>
+  <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community through the “Post a conference” and “Post a job” forms at the top and reviewed before they appear. Past events and expired deadlines drop off automatically.</p>
   <p style="margin-top:10px"><b>Last paper update:</b> ${esc(D.generated)||"never"}.</p>`;
 }
 async function subscribe(e){
   e.preventDefault();const f=e.target;
   try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(f)).toString()});
     toast(r.ok?"Thanks! You're on the list.":"Something went wrong. Please try again.");if(r.ok)f.reset();}
+  catch(_){toast("Network error. Please try again.");}
+  return false;
+}
+function openDlg(id){const d=$(id);if(d.showModal)d.showModal();else d.setAttribute("open","");return false}
+async function sendForm(e,id){
+  e.preventDefault();const f=e.target;
+  try{const r=await fetch("/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams(new FormData(f)).toString()});
+    if(r.ok){toast("Thanks! Your submission will appear once reviewed.");f.reset();$(id).close();}else toast("Something went wrong. Please try again.");}
   catch(_){toast("Network error. Please try again.");}
   return false;
 }

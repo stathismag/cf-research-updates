@@ -3,15 +3,17 @@
 Live site: https://cf-research-updates.netlify.app
 
 Static site hosted on Netlify. A GitHub Action refreshes the paper listings on the 1st and 15th of each month;
-conferences and jobs come from a Google Sheet fed by two Google Forms. Every commit (including the bot's)
+conferences and jobs are kept in two JSON files, fed by Netlify forms on the site. Every commit (including the bot's)
 triggers a Netlify redeploy.
 
 ## Files
 
 ```
-index.html                   the site (edit only the SHEETS and FORMS links at the top of the script)
+index.html                   the site
 data.json                    paper listings, written by the Action
-netlify.toml                 stops Netlify caching data.json
+conferences.json             conference listings, edited by hand
+jobs.json                    job listings, edited by hand
+netlify.toml                 stops Netlify caching the .json files
 scripts/fetch_papers.py      pulls new papers from Crossref, tags them, writes data.json
 scripts/config.json          journals, themes, keyword rules
 .github/workflows/update.yml schedule for the script
@@ -30,34 +32,29 @@ scripts/config.json          journals, themes, keyword rules
 5. Connect the repo to Netlify (Add new project → Import from GitHub). No build command; publish directory `.`.
 6. Netlify → Project configuration → Forms → **Enable form detection**, then redeploy once. Subscriber emails
    appear under Forms → `subscribe` (free tier: 100 submissions/month; email notifications can be added there).
-7. Set up the Google Sheet for conferences and jobs (see below) and paste the four links into `index.html`.
+7. Done. Conferences and jobs need no further setup (see below).
 
-## Conferences and jobs (Google Sheet)
+## Conferences and jobs
 
-Two Google Forms write to one spreadsheet with tabs `Conferences` and `Jobs`. Each response tab has an
-`Approved` checkbox column added by hand (column J for conferences, column H for jobs). Two further tabs,
-`Conferences (public)` and `Jobs (public)`, contain only approved rows via
+Visitors submit listings with the "Post a conference" and "Post a job" pop-ups on the site. These are Netlify
+forms named `conference` and `job`; submissions appear in Netlify → Forms (turn on email notifications there if you
+want to be told). Netlify only detects the forms on a deploy, so redeploy once after enabling form detection.
 
+To publish a submission, add it to `conferences.json` or `jobs.json` in this repo (edit the file on GitHub and
+commit; Netlify redeploys within a minute). Both files are lists of entries; all keys are optional except the first one(s):
+
+```json
+conferences.json
+[{"name": "Event name", "organiser": "Host", "location": "City", "start_date": "2027-05-10", "end_date": "2027-05-12",
+  "submission_deadline": "2027-02-01", "website": "https://example.org", "theme": "Climate Uncertainty"}]
+
+jobs.json
+[{"institution": "University", "position": "Assistant Professor of Finance", "field": "Corporate Finance",
+  "location": "City", "application_deadline": "2027-01-15", "link": "https://example.org/job"}]
 ```
-=IFERROR(FILTER(Conferences!B2:I, Conferences!J2:J=TRUE),"")
-=IFERROR(FILTER(Jobs!B2:G, Jobs!H2:H=TRUE),"")
-```
 
-and are published to the web as CSV (File → Share → Publish to web → that tab → CSV). Those two CSV links go into
-`SHEETS` in `index.html`; the two form links go into `FORMS`.
-
-Form questions, in order, with exactly these titles:
-
-- Conference form: Event name, Organiser, Location, Start date, End date, Submission deadline, Website, Theme
-  (dropdown: General, Climate Uncertainty, Biodiversity & Nature, Cybersecurity, Crypto & Digital Assets,
-  Political Geography, AI & Technology, Supply Chains & Trade, ESG & Sustainability)
-- Job form: Institution, Position title, Field, Location, Application deadline, Link to posting
-
-Keep "Collect email addresses" off in both forms, because it inserts a column and shifts the letters above.
-If you later add a question to a form, re-check the column letters in the FILTER formulas.
-
-Routine: tick `Approved` to publish a row. It appears on the site within a few minutes. Past events and expired
-deadlines are hidden automatically, so old rows can stay in the sheet.
+Dates are `YYYY-MM-DD`. `theme` is one of the theme names in `scripts/config.json` (or leave it out for General).
+Past events and expired deadlines are hidden automatically, so old entries can stay in the files.
 
 ## Routine maintenance
 
