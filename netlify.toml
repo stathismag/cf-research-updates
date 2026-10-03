@@ -1,18 +1,18 @@
 [[redirects]]
   from = "/linkedin-preview.png"
-  to = "/linkedin-preview.jpg"
+  to = "/linkedin-preview-v4.jpg"
   status = 301
   force = true
 
 [[redirects]]
   from = "/social-preview.jpg"
-  to = "/linkedin-preview.jpg"
+  to = "/linkedin-preview-v4.jpg"
   status = 301
   force = true
 
 [[redirects]]
   from = "/social-preview.svg"
-  to = "/linkedin-preview.jpg"
+  to = "/linkedin-preview-v4.jpg"
   status = 301
   force = true
 
