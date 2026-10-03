@@ -23,11 +23,6 @@
     Cache-Control = "no-cache"
 
 
-[[redirects]]
-  from = "/social-preview.jpg"
-  to = "/.netlify/images?url=/social-preview.svg&w=1200&h=627&fit=cover&fm=jpg&q=90"
-  status = 200
-  force = true
 
 [[headers]]
   for = "/social-preview.svg"
