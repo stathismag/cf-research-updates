@@ -39,6 +39,9 @@ jobs:
         env:
           DAYS: ${{ inputs.days }}
 
+      - name: Build crawlable site and archive
+        run: python scripts/build_site.py
+
       - name: Email the digest to subscribers
         run: python scripts/send_digest.py
         env:
@@ -48,7 +51,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.json sent.json
+          git add data.json sent.json index.html issues archive sitemap.xml robots.txt
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

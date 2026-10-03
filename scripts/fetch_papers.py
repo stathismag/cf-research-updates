@@ -157,10 +157,14 @@ def window(args):
             prev = (json.loads(OUT.read_text(encoding="utf-8")).get("window") or {}).get("to")
         except Exception:
             prev = None
+    baseline = today - dt.timedelta(days=CFG.get("window_days", 14))
     if prev:
-        since = dt.date.fromisoformat(prev) - dt.timedelta(days=CFG.get("overlap_days", 2))
+        # Preserve continuity with the previous issue, but never let a manual
+        # rerun shrink the visible window below the normal bi-weekly span.
+        linked = dt.date.fromisoformat(prev) - dt.timedelta(days=CFG.get("overlap_days", 2))
+        since = min(baseline, linked)
     else:
-        since = today - dt.timedelta(days=CFG.get("window_days", 14))
+        since = baseline
     since = max(since, today - dt.timedelta(days=CFG.get("max_window_days", 45)))
     return since, today
 
