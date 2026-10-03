@@ -72,3 +72,9 @@
   [headers.values]
     Cache-Control = "public, max-age=86400, must-revalidate"
     Content-Type = "image/jpeg"
+
+[[headers]]
+  for = "/linkedin-preview-v4.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Content-Type = "image/jpeg"
