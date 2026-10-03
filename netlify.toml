@@ -45,3 +45,10 @@
   [headers.values]
     Cache-Control = "public, max-age=86400, must-revalidate"
     Content-Type = "image/jpeg"
+
+
+[[headers]]
+  for = "/social-preview.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400, must-revalidate"
+    Content-Type = "image/jpeg"
