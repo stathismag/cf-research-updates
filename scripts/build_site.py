@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/"data.json"; INDEX=ROOT/"index.html"; ISSUES=ROOT/"issues"; ARCHIVE=ROOT/"archive"
 SITE_URL="https://corporatefinanceupdates.com"
-SOCIAL_IMAGE="https://corporatefinanceupdates.com/linkedin-preview.jpg?v=20261003-2"
+SOCIAL_IMAGE="https://corporatefinanceupdates.com/linkedin-preview-v4.jpg"
 
 def esc(v): return html.escape(str(v or ""), quote=True)
 def period(d):
