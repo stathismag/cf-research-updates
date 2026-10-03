@@ -1,3 +1,21 @@
+[[redirects]]
+  from = "/linkedin-preview.png"
+  to = "/linkedin-preview.jpg"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/social-preview.jpg"
+  to = "/linkedin-preview.jpg"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/social-preview.svg"
+  to = "/linkedin-preview.jpg"
+  status = 301
+  force = true
+
 [build]
   command = "python3 -m pip install --quiet pillow && python3 scripts/build_social_preview.py"
   publish = "."
