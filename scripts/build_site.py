@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/"data.json"; INDEX=ROOT/"index.html"; ISSUES=ROOT/"issues"; ARCHIVE=ROOT/"archive"
 SITE_URL="https://corporatefinanceupdates.com"
-SOCIAL_IMAGE="https://cf-research-updates.netlify.app/.netlify/images?url=/social-preview.svg&w=1200&h=627&fit=cover&fm=jpg&q=90"
+SOCIAL_IMAGE="https://corporatefinanceupdates.com/linkedin-preview.jpg"
 
 def esc(v): return html.escape(str(v or ""), quote=True)
 def period(d):
