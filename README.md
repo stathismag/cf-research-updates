@@ -1,6 +1,6 @@
 # Corporate Finance Research Updates
 
-Live site: https://cf-research-updates.netlify.app
+Live site: https://corporatefinanceupdates.com
 
 Static site hosted on Netlify. A GitHub Action refreshes the paper listings on the 1st and 15th of each month;
 conferences and jobs are kept in two JSON files, fed by Netlify forms on the site. Every commit (including the bot's)

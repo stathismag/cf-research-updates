@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://cf-research-updates.netlify.app/sitemap.xml
+Sitemap: https://corporatefinanceupdates.com/sitemap.xml

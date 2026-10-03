@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/"data.json"; INDEX=ROOT/"index.html"; ISSUES=ROOT/"issues"; ARCHIVE=ROOT/"archive"
-SITE_URL="https://cf-research-updates.netlify.app"
+SITE_URL="https://corporatefinanceupdates.com"
 
 def esc(v): return html.escape(str(v or ""), quote=True)
 def period(d):
