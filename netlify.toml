@@ -1,4 +1,5 @@
 [build]
+  command = "python3 -m pip install --quiet pillow && python3 scripts/build_social_preview.py"
   publish = "."
 
 [[headers]]
@@ -49,7 +50,7 @@
 
 
 [[headers]]
-  for = "/linkedin-preview.png"
+  for = "/linkedin-preview.jpg"
   [headers.values]
     Cache-Control = "public, max-age=86400, must-revalidate"
-    Content-Type = "image/png"
+    Content-Type = "image/jpeg"
