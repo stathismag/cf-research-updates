@@ -39,6 +39,6 @@
   for = "/*"
   [headers.values]
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    Content-Security-Policy = "upgrade-insecure-requests"
+    Content-Security-Policy = "upgrade-insecure-requests; frame-src 'none'; child-src 'none'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
