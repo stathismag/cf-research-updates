@@ -76,6 +76,6 @@ d.line([(62,542),(770,542)],fill=(82,105,121),width=1)
 d.text((62,565),"Curated by",font=sans,fill=MUTED)
 d.text((176,565),"Efstathios Magerakis",font=sans_b,fill=GOLD)
 
-out=Path(__file__).resolve().parents[1]/"linkedin-preview.jpg"
-im.save(out,"JPEG",quality=90,optimize=True,progressive=True)
+out=Path(__file__).resolve().parents[1]/"linkedin-preview-v4.jpg"
+im.save(out,"JPEG",quality=88,optimize=True,progressive=False,subsampling=2)
 print(f"Wrote {out} ({W}x{H})")
