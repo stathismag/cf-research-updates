@@ -166,30 +166,6 @@ def works(issn, since, until, rows, max_pages):
             return
 
 
-def prefix_works(prefix, since, until, rows, max_pages):
-    """Retrieve newly registered Crossref works under a DOI prefix.
-
-    SSRN records are not reliably typed as journal-article, so querying the
-    SSRN Electronic Journal ISSN with type:journal-article can return zero.
-    SSRN DOIs use the 10.2139 prefix; query posted-content by its posted date.
-    """
-    cursor = "*"
-    for _ in range(max_pages):
-        data = get(f"{API}/prefixes/{prefix}/works", {
-            "filter": f"from-posted-date:{since},until-posted-date:{until},type:posted-content",
-            "rows": rows, "cursor": cursor,
-            "select": "DOI,title,author,abstract,created,posted,URL,type",
-        })
-        if data is None:
-            print(f"  WARNING: DOI prefix {prefix} not found on Crossref - check config.json", flush=True)
-            return
-        msg = data["message"]
-        items = msg.get("items", [])
-        yield from items
-        cursor = msg.get("next-cursor")
-        if len(items) < rows or not cursor:
-            return
-
 
 def fetch_journals(since, until):
     out, seen = [], set()
@@ -298,9 +274,9 @@ def fetch_ssrn(since, until):
         if not items or not cursor or raw_rows >= total_available:
             break
 
-    if total_available is None or raw_rows != total_available:
+    if total_available is None or raw_rows < total_available:
         raise RuntimeError(
-            f"OpenAlex SSRN pagination incomplete: fetched {raw_rows} of {total_available} records."
+            f"OpenAlex SSRN pagination incomplete: fetched {raw_rows} of at least {total_available} records."
         )
 
     out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
@@ -313,6 +289,7 @@ def fetch_ssrn(since, until):
         "status": "ok",
         "raw_rows": raw_rows,
         "total_available": total_available,
+        "complete": raw_rows >= total_available,
         "kept": len(kept),
         "source": "OpenAlex repository",
     }
@@ -470,6 +447,12 @@ def fetch_nber(since, until):
         "latest_seen": latest_issue.isoformat(),
     }
 
+
+def title_key(title):
+    return re.sub(r"[^a-z0-9]+", "", (title or "").lower())
+
+
+
 def window(args):
     today = dt.date.today()
     if args.days:
@@ -544,6 +527,13 @@ def main():
         nber, nber_health = fetch_nber(since.isoformat(), until.isoformat())
     else:
         nber, nber_health = [], {"status": "disabled", "program_ids": 0, "metadata_checked": 0, "kept": 0}
+
+    nber_titles = {title_key(p.get("t")) for p in nber if p.get("t")}
+    before = len(ssrn)
+    ssrn = [p for p in ssrn if title_key(p.get("t")) not in nber_titles]
+    ssrn_health["deduped_against_nber"] = before - len(ssrn)
+    ssrn_health["kept"] = len(ssrn)
+
     pubs.sort(key=lambda p: (p["d"], p["j"]), reverse=True)
     data = {
         "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
