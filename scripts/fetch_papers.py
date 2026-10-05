@@ -45,7 +45,34 @@ def rx(words):
 
 THEME_RX = {k: rx(v["keywords"]) for k, v in CFG["themes"].items()}
 AREA_RX = {k: rx(v) for k, v in CFG["areas"].items()}
-SSRN_CONTEXT_RX = rx(["firm*", "corporate", "company", "companies", "CEO*", "board*", "shareholder*"])
+SSRN_CONTEXT_RX = rx([
+    "firm*", "corporate", "company", "companies", "business*", "enterprise*",
+    "CEO", "board*", "shareholder*", "bank", "banks", "banking",
+    "lender*", "borrower*", "startup*", "start-up*",
+])
+SSRN_STRONG_TITLE_RX = rx([
+    "corporate finance", "capital structure", "leverage", "cash holding*", "working capital",
+    "corporate liquidity", "dividend*", "payout*", "buyback*", "repurchase*",
+    "merger*", "acquisition*", "takeover*", "IPO*", "initial public offering*",
+    "venture capital", "private equity", "corporate bond*", "debt maturity",
+    "debt issuance", "equity issuance", "cost of capital", "firm value", "Tobin*",
+    "capital expenditure*", "trade credit", "loan covenant*", "credit rating*",
+    "financing constraint*", "financial constraint*", "financial distress",
+    "executive compensation", "shareholder*", "CEO", "corporate governance",
+    "corporate investment*", "bank loan*", "bank lending", "credit supply",
+    "loan pricing", "loan rate*",
+])
+SSRN_GENERIC_TITLE_RX = rx([
+    "debt", "equity", "investment*", "governance", "credit", "loan*", "lending",
+    "bond*", "financing", "valuation", "liquidity", "cash flow*", "ownership",
+    "innovation", "capital", "stock return*", "default", "fundraising",
+    "underpricing", "listing*",
+])
+SSRN_EXCLUDE_TITLE_RX = rx([
+    "sovereign", "central bank", "government debt", "public debt", "public pension*",
+    "household*", "consumer credit", "microcredit", "financial inclusion", "CBDC*",
+    "digital currency", "mortgage*", "student loan*",
+])
 
 
 def get(url, params=None):
@@ -143,6 +170,16 @@ def fetch_journals(since, until):
     return out
 
 
+def ssrn_relevant(p):
+    """High-signal corporate-finance inclusion based primarily on the paper title."""
+    title = p["t"]
+    if SSRN_STRONG_TITLE_RX.search(title):
+        return True
+    if SSRN_EXCLUDE_TITLE_RX.search(title):
+        return False
+    return bool(SSRN_CONTEXT_RX.search(title) and SSRN_GENERIC_TITLE_RX.search(title))
+
+
 def ssrn_score(p):
     """Ranking only: title hits count double; corporate context adds two."""
     title = p["t"].lower()
@@ -150,7 +187,8 @@ def ssrn_score(p):
     return (
         2 * sum(bool(r.search(title)) for r in AREA_RX.values())
         + sum(bool(r.search(text)) for r in AREA_RX.values())
-        + 2 * bool(SSRN_CONTEXT_RX.search(text))
+        + 3 * bool(SSRN_CONTEXT_RX.search(title))
+        + 4 * bool(SSRN_STRONG_TITLE_RX.search(title))
     )
 
 
@@ -179,10 +217,7 @@ def fetch_ssrn(since, until):
             p = parse(it, "SSRN")
             if not p or p["doi"] in seen:
                 continue
-            text = f"{p['t']} {p.get('ab','')}".lower()
-            classic = p["a"] != "General"
-            themed = bool(p["th"]) and bool(SSRN_CONTEXT_RX.search(text))
-            if not (classic or themed):
+            if not ssrn_relevant(p):
                 continue
             seen.add(p["doi"])
             out.append(p)
@@ -201,12 +236,23 @@ def fetch_ssrn(since, until):
             f"cursor exhausted={exhausted}. Raise ssrn.max_pages if the window is long."
         )
 
+    matched_before_title_dedup = len(out)
+    by_title = {}
+    for p in out:
+        k = title_key(p["t"])
+        prev = by_title.get(k)
+        if prev is None or (ssrn_score(p), p["d"], p["doi"]) > (ssrn_score(prev), prev["d"], prev["doi"]):
+            by_title[k] = p
+    out = list(by_title.values())
+    title_duplicates_removed = matched_before_title_dedup - len(out)
+
     out.sort(key=lambda p: (ssrn_score(p), p["d"], p["t"]), reverse=True)
-    kept = out[:cfg.get("max_items", 300)]
+    kept = out[:cfg.get("max_items", 100)]
     kept.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
     print(
-        f"  SSRN examined {raw_rows} of {total_available}, matched {len(out)}, "
-        f"kept {len(kept)}, dropped by cap {len(out)-len(kept)}",
+        f"  SSRN examined {raw_rows} of {total_available}, matched {matched_before_title_dedup}, "
+        f"title-deduped {title_duplicates_removed}, kept {len(kept)}, "
+        f"dropped by cap {len(out)-len(kept)}",
         flush=True,
     )
     return kept, {
@@ -215,7 +261,9 @@ def fetch_ssrn(since, until):
         "total_available": total_available,
         "raw_rows": raw_rows,
         "complete": True,
-        "keyword_matches": len(out),
+        "keyword_matches": matched_before_title_dedup,
+        "title_duplicates_removed": title_duplicates_removed,
+        "post_dedup_matches": len(out),
         "kept": len(kept),
         "dropped_by_cap": len(out) - len(kept),
     }

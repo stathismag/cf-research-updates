@@ -81,6 +81,11 @@ def main():
     if int(nh.get("kept",-1)) != len(d["nber"]):
         fail(f"NBER health/data count mismatch: {nh} vs {len(d['nber'])}")
 
+    ssrn_titles=set()
+    for p in d["ssrn"]:
+        k=re.sub(r"[^a-z0-9]+","",(p.get("t") or "").lower())
+        if k in ssrn_titles: fail(f"duplicate normalized SSRN title: {p.get('t')}")
+        ssrn_titles.add(k)
     if len(d["ssrn"])>int(CFG["ssrn"].get("max_items",200)): fail("SSRN cap exceeded")
     if len(d["nber"])>int(CFG["nber"].get("max_items",100)): fail("NBER cap exceeded")
 

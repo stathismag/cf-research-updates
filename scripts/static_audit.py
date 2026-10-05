@@ -47,6 +47,10 @@ def main():
     ssrn=cfg.get("ssrn") or {}
     if ssrn.get("source")!="crossref_prefix" or ssrn.get("prefix")!="10.2139":
         fail(f"unexpected SSRN source config: {ssrn}")
+    if int(ssrn.get("max_items",9999))>100:
+        fail("SSRN max_items should remain curated at 100 or fewer")
+    if "CEO*" in (cfg.get("areas") or {}).get("Governance",[]):
+        fail("Governance keyword CEO* is unsafe because it matches chemistry terms such as CeOx")
     stale=("OpenAlex","Financial Economics Network","data.nber.org","linkedin-preview-v4.jpg")
     combined="\n".join((index,build,fetch,readme,netlify))
     found=[s for s in stale if s in combined]
