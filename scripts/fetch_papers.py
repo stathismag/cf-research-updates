@@ -456,6 +456,7 @@ def check():
     owner = (d.get("message") or {}).get("name") or "registered prefix"
     print(f"SSRN  Crossref prefix {ssrn['prefix']}: {owner}")
 
+    today = dt.date.today()
     candidates, total_cf, latest_issue = nber_candidates(
         (today - dt.timedelta(days=31)).isoformat(), today.isoformat()
     )
