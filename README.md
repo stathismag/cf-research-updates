@@ -94,7 +94,7 @@ Past events and expired deadlines are hidden automatically, so old entries can s
 - Journal articles: free Crossref API, by journal ISSN. The DOI registration date is used as the online-first date.
   Each paper is matched against the keyword dictionaries in `config.json` for themes, and assigned the classic area
   with the most keyword hits. Management Science is only included when a paper matches at least one keyword.
-- SSRN: SSRN has no public API. The script uses the DOIs SSRN registers with Crossref (`SSRN Electronic Journal`) and
+- SSRN: SSRN has no public API. The updater uses OpenAlex's SSRN Electronic Journal repository source (S4210172589), filters by publication date, and then applies the project's corporate-finance keyword rules to titles and abstracts.
   keeps titles matching corporate-finance keywords. Abstracts are usually missing there, so this list is approximate.
 - If GitHub shows a notice that the scheduled workflow was disabled for inactivity, re-enable it in the Actions tab.
 
