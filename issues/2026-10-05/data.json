@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-05 11:14 UTC",
+ "generated": "2026-10-05 18:42 UTC",
  "window": {
   "from": "2026-09-21",
   "to": "2026-10-05"
@@ -76,6 +76,17 @@
  ],
  "pubs": [
   {
+   "j": "JFM",
+   "t": "Fragmented liquidity and predictable jump intensity",
+   "d": "2026-10-05",
+   "a": "Cash & Liquidity",
+   "th": [],
+   "au": "Saad Ali Khan, Ryan Riordan",
+   "ab": "",
+   "url": "https://doi.org/10.1016/j.finmar.2026.101095",
+   "doi": "10.1016/j.finmar.2026.101095"
+  },
+  {
    "j": "CGIR",
    "t": "Digital Search Disruption and Corporate Governance: Evidence From Google's Withdrawal and Executive Gender Diversity in China",
    "d": "2026-10-05",
@@ -109,6 +120,17 @@
    "ab": "",
    "url": "https://doi.org/10.1016/j.jfineco.2026.104363",
    "doi": "10.1016/j.jfineco.2026.104363"
+  },
+  {
+   "j": "RoF",
+   "t": "Creation After Destruction? Financial Intermediation and Firm Entry After Bank Cleanups",
+   "d": "2026-10-01",
+   "a": "Banking & Credit",
+   "th": [],
+   "au": "Nishant Kashyap, Prasanna Tantri",
+   "ab": "We study a large and unanticipated bank cleanup in India after prolonged zombie lending under regulatory forbearance. The cleanup forced widespread zombie exits through bankruptcy. In contrast to a frictionless world where entry automatically follows exit, we show that with financial frictions, local banking conditions shape creation after destruction. New firm entry occurs primarily in regions where banks are present, well-capitalized, competitive, and possess sectoral expertise. We further find a decline in the dispersion of total factor productivity in regions with stronger financial intermediation, consistent with a reduction in misallocation in such areas.",
+   "url": "https://doi.org/10.1093/rof/rfag045",
+   "doi": "10.1093/rof/rfag045"
   },
   {
    "j": "MS",
@@ -223,17 +245,6 @@
    "ab": "We document that the nature of aggregate consumption dynamics changes when the bond‐stock correlation switches sign. We identify three regimes in a real‐time, sequential learning framework: two highly persistent regimes where permanent or transitory consumption shocks are more dominant, and a largely transitory disaster regime. We study the implications for asset prices. The transition from the second to the first regime in the late 1990s makes the correlation between equities and real bonds switch from positive to negative as in the data, providing an explanation from the perspective of real consumption dynamics. The findings extend to the international setting.",
    "url": "https://doi.org/10.1111/jofi.70092",
    "doi": "10.1111/jofi.70092"
-  },
-  {
-   "j": "JFQA",
-   "t": "Resolution Design and Investment in Banking Groups – CORRIGENDUM",
-   "d": "2026-09-29",
-   "a": "Investment",
-   "th": [],
-   "au": "Albert Banal-Estañol, Gyöngyi Lóránth, David Pothier",
-   "ab": "",
-   "url": "https://doi.org/10.1017/s0022109026103378",
-   "doi": "10.1017/s0022109026103378"
   },
   {
    "j": "JFQA",
@@ -614,17 +625,6 @@
    "doi": "10.1111/jofi.70081"
   },
   {
-   "j": "JF",
-   "t": "AMERICAN FINANCE ASSOCIATION",
-   "d": "2026-09-22",
-   "a": "General",
-   "th": [],
-   "au": "—",
-   "ab": "",
-   "url": "https://doi.org/10.1111/jofi.13354",
-   "doi": "10.1111/jofi.13354"
-  },
-  {
    "j": "JCF",
    "t": "One size doesn't fit all: flexible financing as a catalyst for innovation",
    "d": "2026-09-22",
@@ -706,5 +706,455 @@
    "doi": "10.1111/eufm.70098"
   }
  ],
- "ssrn": []
+ "nber": [
+  {
+   "j": "NBER",
+   "t": "When Tax Shields Shrink: Interest Deductibility Limitations and Corporate Innovation",
+   "d": "2026-09-22",
+   "a": "Investment",
+   "th": [],
+   "au": "Xinru Chen, Mara Faccio, Stefano Manfredonia & Jin Xu",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35775",
+   "doi": "10.3386/w35775",
+   "wp": "35775"
+  },
+  {
+   "j": "NBER",
+   "t": "Regulating Entrepreneurship: The Case of Capital Requirements",
+   "d": "2026-09-22",
+   "a": "General",
+   "th": [],
+   "au": "Annika Bacher, Andreas Fagereng, Marius A. K. Ring & Ella Getz Wold",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35780",
+   "doi": "10.3386/w35780",
+   "wp": "35780"
+  },
+  {
+   "j": "NBER",
+   "t": "Governing Global Externalities: Investor Voice Amid Fragmented Policy",
+   "d": "2026-09-22",
+   "a": "General",
+   "th": [],
+   "au": "Robin Döttling, Doron Levit, Nadya Malenko & Magdalena Rola-Janicka",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35778",
+   "doi": "10.3386/w35778",
+   "wp": "35778"
+  },
+  {
+   "j": "NBER",
+   "t": "Social Capital and Innovation: Evidence from Facebook Friendship Networks",
+   "d": "2026-09-15",
+   "a": "Investment",
+   "th": [],
+   "au": "Brad Cannon, David Hirshleifer & Joshua Thornton",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35732",
+   "doi": "10.3386/w35732",
+   "wp": "35732"
+  },
+  {
+   "j": "NBER",
+   "t": "Do Social Norms Substitute for Enforcement? Evidence from Public Officials’ Home Purchases in Singapore",
+   "d": "2026-09-15",
+   "a": "General",
+   "th": [],
+   "au": "Tomasz Piskorski, Amit Seru, Jian Zhang & Chun Zhao",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35756",
+   "doi": "10.3386/w35756",
+   "wp": "35756"
+  },
+  {
+   "j": "NBER",
+   "t": "The Impact of Patient Capital",
+   "d": "2026-09-08",
+   "a": "General",
+   "th": [],
+   "au": "Yingxiang Li, Tong Liu & Ting Xu",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35711",
+   "doi": "10.3386/w35711",
+   "wp": "35711"
+  },
+  {
+   "j": "NBER",
+   "t": "Loan Rates as Incentive Instruments",
+   "d": "2026-09-08",
+   "a": "Governance",
+   "th": [],
+   "au": "Kinda Cheryl Hachem",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35696",
+   "doi": "10.3386/w35696",
+   "wp": "35696"
+  },
+  {
+   "j": "NBER",
+   "t": "How Big is Small? The Economic Effects of Access to Small Business Government Support",
+   "d": "2026-09-08",
+   "a": "General",
+   "th": [],
+   "au": "J. David Brown, Matthew Denes, Ran Duchin & John Hackney",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35703",
+   "doi": "10.3386/w35703",
+   "wp": "35703"
+  },
+  {
+   "j": "NBER",
+   "t": "Dynamic Investment and Product Market Rivalry: the Network Q Model",
+   "d": "2026-09-08",
+   "a": "Investment",
+   "th": [],
+   "au": "M. Cecilia Bustamante & Bruno Pellegrino",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35707",
+   "doi": "10.3386/w35707",
+   "wp": "35707"
+  },
+  {
+   "j": "NBER",
+   "t": "Smart Contracting in Network Markets",
+   "d": "2026-09-01",
+   "a": "General",
+   "th": [
+    "crypto"
+   ],
+   "au": "Darrell Duffie & Chaojun Wang",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35678",
+   "doi": "10.3386/w35678",
+   "wp": "35678"
+  },
+  {
+   "j": "NBER",
+   "t": "Democratizing Private Markets: Equilibrium Predictions",
+   "d": "2026-09-01",
+   "a": "General",
+   "th": [],
+   "au": "Lubos Pastor, Robert F. Stambaugh & Lucian A. Taylor",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35665",
+   "doi": "10.3386/w35665",
+   "wp": "35665"
+  },
+  {
+   "j": "NBER",
+   "t": "Canaries in the Gold Mine: Early Productivity Gains from Artificial Intelligence Creating Organization Capital",
+   "d": "2026-09-01",
+   "a": "General",
+   "th": [
+    "ai"
+   ],
+   "au": "Tania Babina, Alex X. He & Renhao Jiang",
+   "ab": "",
+   "url": "https://www.nber.org/papers/w35684",
+   "doi": "10.3386/w35684",
+   "wp": "35684"
+  }
+ ],
+ "ssrn": [
+  {
+   "j": "SSRN",
+   "t": "Brakes or accelerators of green transformation: The monitoring role of bank loans on corporate green investment—A pre-registered study",
+   "d": "2026-10-05",
+   "a": "Banking & Credit",
+   "th": [
+    "esg"
+   ],
+   "au": "Ivy Yang, Junhui Liu, haiming lan",
+   "ab": "This pre-registered study implements the empirical design approved in the associated pre-registered report (Yang et al., 2026) to analyze the impact of bank loans on corporate green investment. Based on samples of Chinese banks and listed firms, we find that bank loans significantly increase corporate green investment, especially among long-maturity bank loans, suggesting an \"accelerator\" effect. Further we find that this governance effect is driven by three incentives. Banks' motivation to mitigate borrowers' environmental risk, banks' regulatory pressure, and banks' green reputation. The green governance effect of bank loans operates through contractual governance rather than relational…",
+   "url": "https://doi.org/10.2139/ssrn.7566394",
+   "doi": "10.2139/ssrn.7566394"
+  },
+  {
+   "j": "SSRN",
+   "t": "Bonus deferral and long-term accountability in executive compensation contracts",
+   "d": "2026-10-05",
+   "a": "Governance",
+   "th": [],
+   "au": "Rebecca  L. Bachmann, Anna Bedford, Le Ma",
+   "ab": "The practice of bonus deferral, whereby a portion of an executive’s earned bonus is withheld from immediate cash payout and delivered after a specified deferral period, is becoming increasingly common in executive compensation contracts, yet little is known about its consequences. While bonus deferral may encourage CEOs to focus on long-term investment and increase shareholder support, it may reduce the attractiveness of CEO compensation contracts by delaying access to pay and increasing exposure to firm specific risks. Using a hand collected sample of Australian listed firms, we examine whether bonus deferral is associated with CEO turnover, long-term investment and shareholder support. We…",
+   "url": "https://doi.org/10.2139/ssrn.7566600",
+   "doi": "10.2139/ssrn.7566600"
+  },
+  {
+   "j": "SSRN",
+   "t": "Pre-announcement trading states and share repurchase announcement returns",
+   "d": "2026-10-03",
+   "a": "Payout Policy",
+   "th": [],
+   "au": "Xiaoying Wu, Hyoung Goo Kang, Doojin Ryu",
+   "ab": "This study examines how firm-level pre-announcement trading states are associated with market reactions to open-market share repurchase announcements. Using Chinese A-share repurchase announcements after the 2018 repurchase reform, we find positive short-term abnormal returns on average, but weaker announcement-window responses when pre-announcement price-and-trading conditions are elevated. The negative association remains similar across alternative event windows and alternative constructions of the trading-state measure, persists after accounting for aggregate market conditions, and is not observed around pseudo-announcement dates. The attenuation is stronger during policy-salient…",
+   "url": "https://doi.org/10.2139/ssrn.7557183",
+   "doi": "10.2139/ssrn.7557183"
+  },
+  {
+   "j": "SSRN",
+   "t": "Household credit tightening and bank interest margins​",
+   "d": "2026-10-03",
+   "a": "Banking & Credit",
+   "th": [],
+   "au": "Heesu Ahn, Doojin Ryu",
+   "ab": "We examine how banks’ interest margins respond to the recent tightening of household credit regulation. This regulatory episode combines borrower-level repayment-capacity constraints under Korea’s Stressed Debt Service Ratio rule with institution-level household loan growth management. We examine whether banks with greater pre-regulation mortgage exposure respond differently to changes in region-weighted regulatory intensity. Banks with higher mortgage exposure maintain relatively higher net interest margins as regulatory intensity increases. Relative maintenance of net interest margin is accompanied by a relative decline in foreign-currency funding. These findings provide evidence from a…",
+   "url": "https://doi.org/10.2139/ssrn.7557224",
+   "doi": "10.2139/ssrn.7557224"
+  },
+  {
+   "j": "SSRN",
+   "t": "Alliance termination and firm value: A resource configuration perspective",
+   "d": "2026-10-03",
+   "a": "Valuation",
+   "th": [],
+   "au": "Jan Hohberger, Heidi Krueger, Xavier Castañer",
+   "ab": "Strategic alliances provide firms with access to external resources and capabilities, but little is known about how investors evaluate alliance termination and how such evaluations depend on firms’ broader resource architectures. Using an event-study design, we examine alliance terminations by U.S. public firms, distinguishing between dissolution and buyout. We find that dissolutions generate negative abnormal returns, whereas buyouts generate more positive average abnormal returns, indicating that investors distinguish between alternative modes of reallocating control over externally accessed resources. However, these effects depend critically on firms’ resource architectures.…",
+   "url": "https://doi.org/10.2139/ssrn.7557000",
+   "doi": "10.2139/ssrn.7557000"
+  },
+  {
+   "j": "SSRN",
+   "t": "Trusted data infrastructure and the direction of corporate innovation: Evidence from China's blockchain innovation pilot",
+   "d": "2026-10-02",
+   "a": "Investment",
+   "th": [
+    "crypto"
+   ],
+   "au": "Chengqi Zu, Hongyu Pan",
+   "ab": "Data have become an important input into industrial innovation, yet their use across organizational boundaries is often constrained by uncertainty over provenance, authorization, traceability, and responsibility. These frictions are particularly consequential for digital-physical innovation, which combines digital knowledge and external data with products, production processes, and engineering expertise. China’s 2022 National Blockchain Innovation Application Pilot created local institutional and technical conditions for trusted data exchange, providing a setting in which to examine how improvements in the data environment affect corporate technological choices. Using text analysis, we…",
+   "url": "https://doi.org/10.2139/ssrn.7553379",
+   "doi": "10.2139/ssrn.7553379"
+  },
+  {
+   "j": "SSRN",
+   "t": "Human and LLM coding of board authority in governance disclosures: Evidence from a preregistered study",
+   "d": "2026-10-02",
+   "a": "Governance",
+   "th": [
+    "ai"
+   ],
+   "au": "Yohei Koyama",
+   "ab": "Governance variables coded from corporate disclosures are widely used in empirical finance, yet final coded data do not show how consistently the coding rules were applied. In a preregistered study, a human coder and a large language model (LLM) independently coded seven board-authority variables for 46 large firms in Japan, the US and the UK. No variable met the registered reliability threshold (exact agreement ≥90% and weighted kappa ≥0.80); agreement was 77.6% after one full recode, ranging from 69.6% to 84.8% by variable. Most disagreements concerned whether a statement counted as positive evidence at all, rather than its level. A second LLM from another provider, registered after these…",
+   "url": "https://doi.org/10.2139/ssrn.7552774",
+   "doi": "10.2139/ssrn.7552774"
+  },
+  {
+   "j": "SSRN",
+   "t": "Beyond data access: Energy big data centers and corporate exploratory green innovation",
+   "d": "2026-10-02",
+   "a": "Investment",
+   "th": [
+    "esg"
+   ],
+   "au": "Peide Lai, Xinrui Luo",
+   "ab": "Big data is increasingly central to corporate economic decision-making. However, whether energy-related data platforms expand firms’ sustainability-related knowledge boundaries remains unclear. Using data from Chinese A-share listed manufacturing firms from 2015 to 2024, we exploit the establishment of provincial-level energy big data centers as a quasi-natural experiment and show that these centers promote exploratory green innovation. The main results remain robust to a battery of checks. We further identify government environmental subsidies as a key mechanism, and find that the effect is stronger for firms with higher-quality environmental governance and disclosure. Heterogeneity…",
+   "url": "https://doi.org/10.2139/ssrn.7552719",
+   "doi": "10.2139/ssrn.7552719"
+  },
+  {
+   "j": "SSRN",
+   "t": "When does verifiability pay? Blockchain-enabled traceability, product integrity and firm value in global supply chains",
+   "d": "2026-09-30",
+   "a": "Valuation",
+   "th": [
+    "crypto",
+    "supply"
+   ],
+   "au": "Daniel Amona, Nazrul Islam, Stanley B. Gyoshev",
+   "ab": "Blockchain-enabled traceability is promoted for making supply-chain information visible, yet evidence on when it creates measurable economic value remains mixed. We conceptualise it as verification infrastructure: its value lies in lowering the cost of establishing credible provenance and custody information across organisational boundaries, not in visibility per se. We argue that this value is realised only where verification need is high and firms can act on verified information. Using a matched panel of 86 listed firms with production-grade deployments and 129 non-adopters in six counterfeit-exposed industries (2018–2024), we combine heterogeneity-robust staggered…",
+   "url": "https://doi.org/10.2139/ssrn.7545845",
+   "doi": "10.2139/ssrn.7545845"
+  },
+  {
+   "j": "SSRN",
+   "t": "Who controls, owns and profits from Australia's agri-food system? An analysis of lead firms, market concentration, common ownership and value distribution",
+   "d": "2026-09-29",
+   "a": "Governance",
+   "th": [
+    "bio",
+    "supply"
+   ],
+   "au": "Scott Slater, Ben Wood, Kim Anastasiou, Rachel Carey, Tammi Jonas, Kate Sievert, Phillip Baker",
+   "ab": "Growing corporate power and financialisation in agrifood systems is reshaping how food is produced, distributed and consumed, to the detriment of producers, public health, social equity and ecosystems. Yet research on Australia's agri-food system has focused largely on the power of its supermarkets, leaving corporate power across the wider system underexamined. Using a political economy approach, we analyse lead corporations, market structures, common ownership and dividend payments across 50 agri-food industries and five supply chain sectors. Ten industries (20%) had high or very high four-firm concentration ratios (CR4 ≥60%), and 16 (32%) had moderate (CR4 40-60%). US asset managers…",
+   "url": "https://doi.org/10.2139/ssrn.7538359",
+   "doi": "10.2139/ssrn.7538359"
+  },
+  {
+   "j": "SSRN",
+   "t": "The effect of corporate integrity on capital structure: Insights from earnings conference calls",
+   "d": "2026-09-29",
+   "a": "Capital Structure",
+   "th": [],
+   "au": "Pattanaporn Chatjuthamard, Pornsit Jiraporn, Pandej Chintrakarn, Suwongrat Papangkorn",
+   "ab": "Our study examines the influence of corporate integrity on capital structure decisions using a novel text-based measure derived from sophisticated textual analysis of earnings conference calls. Using a large sample of U.S. firms spanning 2001–2018, we document a robust negative association between corporate integrity and leverage. Our results are consistent with the interpretation that firms with stronger corporate integrity tend to adopt more conservative financial policies, viewing debt default as a serious ethical violation. We further analyze interaction effects and find that this negative association is significantly weaker for firms with substantial cash holdings and stronger…",
+   "url": "https://doi.org/10.2139/ssrn.7541604",
+   "doi": "10.2139/ssrn.7541604"
+  },
+  {
+   "j": "SSRN",
+   "t": "Cui prodest? The heterogeneous impact of green bonds on companies' environmental performance",
+   "d": "2026-09-28",
+   "a": "Capital Structure",
+   "th": [
+    "climate",
+    "esg"
+   ],
+   "au": "Alessandro Moro, Andrea Zaghini",
+   "ab": "We develop a signaling model in which green bonds allow to uncover the adoption of clean technologies. Since investors show environmental preferences, green companies end up facing lower financing costs and improving their environmental performance. In particular, green bonds encourage more polluting firms to transition toward a cleaner production. Relying on a large sample of global companies, we successfully test the model implications. Moreover, we show that green bonds issued to finance mitigation activities are the most effective in improving companies' environmental performance. In line with model predictions, these bonds display the largest greenium with respect to their conventional…",
+   "url": "https://doi.org/10.2139/ssrn.7537226",
+   "doi": "10.2139/ssrn.7537226"
+  },
+  {
+   "j": "SSRN",
+   "t": "Beyond green dividend: How does climate finance affect income inequality within enterprises?",
+   "d": "2026-09-28",
+   "a": "Payout Policy",
+   "th": [
+    "climate",
+    "esg"
+   ],
+   "au": "Zhao Zhang, Wenqing Zhen, Jing Gao",
+   "ab": "Whether climate finance can improve income distribution within enterprises is a key question in the joint pursuit of common prosperity and carbon-emission reduction targets. This paper constructs a Stackelberg game model to characterize the evolution of pay determination within enterprises under a climate-financial shock. Based on panel data from Chinese A-share listed firms from 2017 to 2024, it uses the National Climate Investment and Finance Pilot Program as a quasi-natural experiment and employs a multi-period difference-in-differences design for empirical testing. We find that climate finance significantly narrows the pay gap within enterprises, a conclusion that survives instrumental…",
+   "url": "https://doi.org/10.2139/ssrn.7537469",
+   "doi": "10.2139/ssrn.7537469"
+  },
+  {
+   "j": "SSRN",
+   "t": "Options listing and corporate resource commitments",
+   "d": "2026-09-27",
+   "a": "Financing & IPOs",
+   "th": [],
+   "au": "Yuan Huang, Lewis Tam, Ruzhou Wang",
+   "ab": "Existing literature suggests that options trading helps mitigate information asymmetry between managers and external investors of the underlying firm. Building on prior studies, this paper examines whether the presence of options trading influences the firm’s resource commitments and how. Our baseline results indicate that firms with options listed on stock exchanges exhibit greater commitment in fixed resources to support operations, as reflected by less responsive expenditures to revenue changes. This effect is stronger in firms whose short-sale constraints are greater, whose SG&As generate higher future value, and whose demand is more uncertain. Additional analysis indicates that the…",
+   "url": "https://doi.org/10.2139/ssrn.7533384",
+   "doi": "10.2139/ssrn.7533384"
+  },
+  {
+   "j": "SSRN",
+   "t": "Extreme heat and corporate innovation: Evidence from Chinese listed firms",
+   "d": "2026-09-26",
+   "a": "Investment",
+   "th": [
+    "climate"
+   ],
+   "au": "Yubin Li, Yanlin Deng, Shuyu Xue",
+   "ab": "Innovation is a knowledge-producing process that depends on the sustained commitment of resources and on the cognitive and collaborative capacity of skilled workers. While a large literature has documented the short-run performance costs of extreme heat, much less is known about whether temperature shocks erode this longer-horizon capacity. This paper examines that question at the firm level. Matching gridded daily temperature data to patent and financial records for 3,449 Chinese listed firms over 2008–2023, we estimate a flexible temperature-bin specification that exploits within-firm variation in annual heat exposure. Relative to days with mean temperatures of 24–30 °C, each additional…",
+   "url": "https://doi.org/10.2139/ssrn.7528971",
+   "doi": "10.2139/ssrn.7528971"
+  },
+  {
+   "j": "SSRN",
+   "t": "Green-intelligent policy mix and corporate green collaborative innovation: Evidence from China",
+   "d": "2026-09-25",
+   "a": "Investment",
+   "th": [
+    "esg"
+   ],
+   "au": "Mengjie Li, Yingwei Guan, Weijian Du",
+   "ab": "Prior studies have concentrated on the independent effects of individual policy instruments, with scant attention to how the synergy between green and intelligent policies drives inter-firm collaborative innovation. Drawing on panel data of Chinese listed firms from 2012 to 2024, this study employs a multi-period difference-in-differences approach to quantify the effect of green-intelligent policy mix on firm green collaborative innovation. The findings indicate that such policy mix promotes green collaborative innovation among local firms through three mechanisms: the alleviation of financing constraints, technology empowerment, and strategic guidance. We further show that executives’…",
+   "url": "https://doi.org/10.2139/ssrn.7524938",
+   "doi": "10.2139/ssrn.7524938"
+  },
+  {
+   "j": "SSRN",
+   "t": "Artificial intelligence applications and corporate cash holdings: Evidence from China",
+   "d": "2026-09-25",
+   "a": "Cash & Liquidity",
+   "th": [
+    "ai"
+   ],
+   "au": "Kewei Gu, Han Su, Yulong Li",
+   "ab": "Artificial intelligence (AI) is reshaping corporate operations and financial decision-making, yet its implications for liquidity policy remain unclear. Using panel data of Chinese listed firms from 2008 to 2024, we examine whether and how corporate AI adoption is associated with cash holdings. We find that corporate AI adoption is significantly negatively associated with cash holdings, and this result is robust across a range of endogeneity and robustness tests. Mechanism analyses indicate that the negative association is consistent with lower agency costs and eased financing constraints, consistent with a weakening of both agency-driven and precautionary cash-holding motives. This…",
+   "url": "https://doi.org/10.2139/ssrn.7524939",
+   "doi": "10.2139/ssrn.7524939"
+  },
+  {
+   "j": "SSRN",
+   "t": "Party organization participation in corporate governance and corporate innovation failure",
+   "d": "2026-09-24",
+   "a": "Investment",
+   "th": [],
+   "au": "Mudan Lan, Yuhong Huang",
+   "ab": "The high investment, high risk, and substantial uncertainty inherent in corporate innovation activities expose firms to pervasive risks of innovation failure. Using data from Chinese A-share listed companies, this study examines whether party organization participation in corporate governance under the modern corporate system with Chinese characteristics can mitigate corporate innovation failure. The findings show that party organization participation in corporate governance significantly reduces the probability of corporate innovation failure. Mechanism tests indicate that this effect is primarily achieved by reducing firms' strategic aggressiveness and strengthening government–enterprise…",
+   "url": "https://doi.org/10.2139/ssrn.7519544",
+   "doi": "10.2139/ssrn.7519544"
+  },
+  {
+   "j": "SSRN",
+   "t": "State-owned enterprises as innovation network orchestrators: External innovation resource orchestration orientation and technological innovation output",
+   "d": "2026-09-23",
+   "a": "Investment",
+   "th": [],
+   "au": "Menglu Song, Zhong Yang",
+   "ab": "State-owned enterprises (SOEs) often enjoy privileged access to innovation resources, yet many still organize technological innovation beyond firm boundaries. Drawing on innovation network orchestration, we conceptualize external innovation resource orchestration orientation (EIRO) as an SOE’s strategic tendency to build interfaces for external resource flows, connect dispersed innovation actors, and coordinate their technological contributions. We develop a dictionary-based measure of EIRO from the management discussion and analysis sections of annual reports and test our hypotheses using 5,210 firm-year observations from 645 Chinese publicly listed SOEs between 2013 and 2024. Firm- and…",
+   "url": "https://doi.org/10.2139/ssrn.7513481",
+   "doi": "10.2139/ssrn.7513481"
+  },
+  {
+   "j": "SSRN",
+   "t": "The impact of macroprudential policy fragmentation on corporate lending – evidence from a novel indicator",
+   "d": "2026-09-22",
+   "a": "Banking & Credit",
+   "th": [
+    "supply"
+   ],
+   "au": "Markus Behn, Marco Forletta, Alessio Reghezza",
+   "ab": "We construct a novel bank-level index that quantifies fragmentation in the capital buffer framework faced by euro area banks. Defined at quarterly frequency, it measures fragmentation by looking at the number of simultaneously active buffers, their geographical dispersion, and the frequency of buffer rate changes within the preceding year. The index is orthogonalised with respect to the level of capital requirements, bank size, and the financial cycle, thus controlling for these factors when measuring fragmentation as defined above. We then show that a one standard deviation increase in the index is associated with about 36 basis points higher capital headroom and around 50 basis points…",
+   "url": "https://doi.org/10.2139/ssrn.7502638",
+   "doi": "10.2139/ssrn.7502638"
+  },
+  {
+   "j": "SSRN",
+   "t": "Out with the new, in with the old? Supranational bank supervision and the composition of firm investment",
+   "d": "2026-09-21",
+   "a": "Investment",
+   "th": [],
+   "au": "Miguel Ampudia, Alexander A. Popov, Thorsten Beck",
+   "ab": "Using exogenous variation generated by the creation of the Single Supervisory Mechanism (SSM) in the euro area, we find that relative to firms borrowing from banks subject to national supervision, firms borrowing from banks subject to supranational supervision reduce their share of intangible assets. This effect does not pre-date the supervisory reform and it does not obtain in non-SSM jurisdictions. The reallocation of investment away from intangible assets is stronger for small and young firms and appears to be driven by a short-term reduction in lending and a persistent increase in collateral standards.",
+   "url": "https://doi.org/10.2139/ssrn.7486799",
+   "doi": "10.2139/ssrn.7486799"
+  },
+  {
+   "j": "SSRN",
+   "t": "Financial impacts of environmental inspection regulations at the micro level: Remediation and corporate capital structure modification driven by enforcement",
+   "d": "2026-09-21",
+   "a": "Capital Structure",
+   "th": [
+    "climate",
+    "esg"
+   ],
+   "au": "Guangke Qin, Jinming Wang",
+   "ab": "Given the global trend towards green and low-carbon growth and the continuous reinforcement of environmental governance, understanding how environmental regulation affects corporate capital structure adjustment has important theoretical and policy consequences. This study investigates the impact of environmental regulatory intensity on capital structure adjustment and investigates the underlying mechanisms using panel data for Chinese A-share listed enterprises from 2010 to 2024. We discover that enterprises' ability to change their capital structure is greatly hampered by stricter environmental regulations. In particular, a 0.504 rise in capital structure deviation is linked to a 1%…",
+   "url": "https://doi.org/10.2139/ssrn.7498867",
+   "doi": "10.2139/ssrn.7498867"
+  }
+ ],
+ "source_health": {
+  "nber": {
+   "status": "ok",
+   "source": "repo NBER CF cache + Crossref",
+   "cache_refreshed": "2026-10-05",
+   "cache_age_days": 0,
+   "candidates": 25,
+   "metadata_checked": 25,
+   "unresolved": 0,
+   "caught_up": 9,
+   "kept": 12
+  },
+  "ssrn": {
+   "status": "ok",
+   "source": "Crossref DOI prefix 10.2139",
+   "total_available": 12965,
+   "raw_rows": 12965,
+   "complete": true,
+   "keyword_matches": 22,
+   "title_duplicates_removed": 0,
+   "post_dedup_matches": 22,
+   "kept": 22,
+   "dropped_by_cap": 0,
+   "deduped_against_nber": 0
+  }
+ }
 }
