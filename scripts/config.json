@@ -358,7 +358,7 @@
     "cache_path": "cache/nber_cf_program.json",
     "program_code": "CF",
     "catchup_days": 21,
-    "cache_warn_days": 45,
+    "cache_warn_days": 7,
     "max_items": 100
   }
 }

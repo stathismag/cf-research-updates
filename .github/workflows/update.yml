@@ -42,9 +42,10 @@ jobs:
 
       - name: Static syntax and config checks
         run: |
-          python -m py_compile scripts/fetch_papers.py scripts/build_site.py scripts/send_digest.py scripts/validate_update.py
+          python -m py_compile scripts/fetch_papers.py scripts/build_site.py scripts/send_digest.py scripts/validate_update.py scripts/static_audit.py
           python -m json.tool scripts/config.json > /dev/null
           python -m json.tool cache/nber_cf_program.json > /dev/null
+          python scripts/static_audit.py
           python - <<'PY'
           import tomllib
           from pathlib import Path
