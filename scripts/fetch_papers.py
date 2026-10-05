@@ -51,27 +51,32 @@ SSRN_CONTEXT_RX = rx([
     "lender*", "borrower*", "startup*", "start-up*",
 ])
 SSRN_STRONG_TITLE_RX = rx([
-    "corporate finance", "capital structure", "leverage", "cash holding*", "working capital",
-    "corporate liquidity", "dividend*", "payout*", "buyback*", "repurchase*",
-    "merger*", "acquisition*", "takeover*", "IPO*", "initial public offering*",
+    "corporate finance", "capital structure", "cash holding*", "working capital",
+    "corporate liquidity", "dividend policy", "payout policy", "share repurchase*",
+    "stock repurchase*", "corporate payout*", "mergers and acquisitions",
+    "merger and acquisition*", "takeover*", "IPO*", "initial public offering*",
     "venture capital", "private equity", "corporate bond*", "debt maturity",
     "debt issuance", "equity issuance", "cost of capital", "firm value", "Tobin*",
     "capital expenditure*", "trade credit", "loan covenant*", "credit rating*",
     "financing constraint*", "financial constraint*", "financial distress",
-    "executive compensation", "shareholder*", "CEO", "corporate governance",
+    "executive compensation", "shareholder activism", "corporate governance",
     "corporate investment*", "bank loan*", "bank lending", "credit supply",
     "loan pricing", "loan rate*",
 ])
 SSRN_GENERIC_TITLE_RX = rx([
     "debt", "equity", "investment*", "governance", "credit", "loan*", "lending",
-    "bond*", "financing", "valuation", "liquidity", "cash flow*", "ownership",
-    "innovation", "capital", "stock return*", "default", "fundraising",
-    "underpricing", "listing*",
+    "bond*", "financing", "valuation", "liquidity", "cash", "cash flow*",
+    "ownership", "innovation", "capital", "stock return*", "default",
+    "fundraising", "underpricing", "listing*", "leverage", "acquisition*",
+    "merger*", "dividend*", "repurchase*",
 ])
 SSRN_EXCLUDE_TITLE_RX = rx([
     "sovereign", "central bank", "government debt", "public debt", "public pension*",
     "household*", "consumer credit", "microcredit", "financial inclusion", "CBDC*",
-    "digital currency", "mortgage*", "student loan*",
+    "digital currency", "mortgage*", "student loan*", "plant", "root", "soil",
+    "rice", "tomato", "amphibian*", "animal behavior", "forest inventory",
+    "remote sensing", "nanoscale", "molybdenum", "nitrogen acquisition",
+    "iron acquisition", "wideband acquisition", "local volatility",
 ])
 
 
@@ -173,11 +178,33 @@ def fetch_journals(since, until):
 def ssrn_relevant(p):
     """High-signal corporate-finance inclusion based primarily on the paper title."""
     title = p["t"]
-    if SSRN_STRONG_TITLE_RX.search(title):
-        return True
     if SSRN_EXCLUDE_TITLE_RX.search(title):
         return False
+    if SSRN_STRONG_TITLE_RX.search(title):
+        return True
     return bool(SSRN_CONTEXT_RX.search(title) and SSRN_GENERIC_TITLE_RX.search(title))
+
+
+def ssrn_filter_selftest():
+    positives = [
+        "The effect of corporate integrity on capital structure",
+        "Artificial intelligence applications and corporate cash holdings: Evidence from China",
+        "Bank lending and firm investment",
+        "Pre-announcement trading states and share repurchase announcement returns",
+        "Bonus deferral and long-term accountability in executive compensation contracts",
+    ]
+    negatives = [
+        "An adaptive precision enhancement method for wideband acquisition systems",
+        "OsMATE34-mediated citrate efflux sustains root iron acquisition and yield stability of rice",
+        "Optimizing translocation outcomes using release methods that leverage animal behavior",
+        "MS-FEED: national forest inventory attributes across heterogeneous remote sensing acquisitions",
+        "Nanoscale molybdenum materials regulate nitrogen acquisition in tomato",
+        "A no-iteration calibration for blended-dividend local volatility",
+    ]
+    bad_pos = [t for t in positives if not ssrn_relevant({"t": t})]
+    bad_neg = [t for t in negatives if ssrn_relevant({"t": t})]
+    if bad_pos or bad_neg:
+        raise RuntimeError(f"SSRN relevance self-test failed; positives={bad_pos}, negatives={bad_neg}")
 
 
 def ssrn_score(p):
@@ -430,6 +457,8 @@ def window(args):
 
 
 def check():
+    ssrn_filter_selftest()
+    print("SSRN  relevance self-test: PASS")
     for code, j in CFG["journals"].items():
         d = get(f"{API}/journals/{j['issn']}")
         name = d["message"]["title"] if d else "NOT FOUND - fix this ISSN"
@@ -480,6 +509,7 @@ def main():
     if args.check:
         check()
         return 0
+    ssrn_filter_selftest()
     since, until = window(args)
     print(f"Window {since} to {until}")
     print("Journals:")

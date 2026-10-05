@@ -43,7 +43,10 @@ def main():
     if 'default: false' not in workflow:
         fail("manual safety defaults are missing")
 
-    # Canonical SSRN design: Crossref only.
+    # Canonical SSRN design: Crossref only and a deterministic relevance self-test.
+    if "def ssrn_filter_selftest():" not in fetch or "SSRN  relevance self-test: PASS" not in fetch:
+        fail("SSRN relevance self-test is missing from fetch_papers.py")
+
     ssrn=cfg.get("ssrn") or {}
     if ssrn.get("source")!="crossref_prefix" or ssrn.get("prefix")!="10.2139":
         fail(f"unexpected SSRN source config: {ssrn}")
