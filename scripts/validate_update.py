@@ -54,8 +54,9 @@ def main():
     nh=health.get("nber") or {}
     if sh.get("status")!="ok" or int(sh.get("raw_rows",0))<=0:
         fail(f"SSRN source unhealthy: {sh}")
-    if sh.get("source")!="OpenAlex repository":
-        fail(f"Unexpected SSRN source: {sh}")
+    expected_ssrn_source=f"Crossref DOI prefix {CFG['ssrn']['prefix']}"
+    if sh.get("source")!=expected_ssrn_source:
+        fail(f"Unexpected SSRN source: {sh}; expected {expected_ssrn_source}")
     if not sh.get("complete") or int(sh.get("raw_rows",0)) < int(sh.get("total_available",-1)):
         fail(f"SSRN pagination incomplete: {sh}")
     if int(sh.get("kept",-1)) != len(d["ssrn"]):
