@@ -1,24 +1,18 @@
 [[redirects]]
-  from = "/linkedin-preview.png"
-  to = "/linkedin-preview-v4.jpg"
-  status = 301
-  force = true
-
-[[redirects]]
   from = "/social-preview.jpg"
-  to = "/linkedin-preview-v4.jpg"
+  to = "/linkedin-preview.png"
   status = 301
   force = true
 
 [[redirects]]
   from = "/social-preview.svg"
-  to = "/linkedin-preview-v4.jpg"
+  to = "/linkedin-preview.png"
   status = 301
   force = true
 
 [build]
   publish = "."
-  ignore = 'git log -1 --pretty=%B $COMMIT_REF | grep -q "\[skip netlify\]" || git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- index.html data.json conferences.json jobs.json issues archive sitemap.xml robots.txt netlify.toml favicon.png linkedin-preview-v4.jpg'
+  ignore = 'git log -1 --pretty=%B $COMMIT_REF | grep -q "\[skip netlify\]" || git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- index.html data.json conferences.json jobs.json issues archive sitemap.xml robots.txt netlify.toml favicon.png linkedin-preview.png'
 
 [[headers]]
   for = "/*.json"
@@ -67,21 +61,16 @@
     Content-Type = "image/jpeg"
 
 
-[[headers]]
-  for = "/linkedin-preview.jpg"
-  [headers.values]
-    Cache-Control = "public, max-age=86400, must-revalidate"
-    Content-Type = "image/jpeg"
-
-[[headers]]
-  for = "/linkedin-preview-v4.jpg"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-    Content-Type = "image/jpeg"
-
 
 [[headers]]
   for = "/favicon.png"
   [headers.values]
     Cache-Control = "public, max-age=604800, immutable"
+    Content-Type = "image/png"
+
+
+[[headers]]
+  for = "/linkedin-preview.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
     Content-Type = "image/png"

@@ -44,6 +44,15 @@ jobs:
         run: |
           python -m py_compile scripts/fetch_papers.py scripts/build_site.py scripts/send_digest.py scripts/validate_update.py
           python -m json.tool scripts/config.json > /dev/null
+          python -m json.tool cache/nber_cf_program.json > /dev/null
+          python - <<'PY'
+          import tomllib
+          from pathlib import Path
+          tomllib.loads(Path("netlify.toml").read_text(encoding="utf-8"))
+          for required in ("favicon.png","linkedin-preview.png"):
+              if not Path(required).is_file():
+                  raise SystemExit(f"Missing required site asset: {required}")
+          PY
 
       - name: Verify upstream sources
         run: python scripts/fetch_papers.py --check
