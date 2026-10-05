@@ -46,6 +46,7 @@ jobs:
         run: python scripts/send_digest.py
         env:
           BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+          SITE_URL: https://corporatefinanceupdates.com
 
       - name: Commit data.json if it changed
         run: |

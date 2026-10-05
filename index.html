@@ -276,7 +276,7 @@ function renderList(){
     <div class="au">${esc(p.au)}</div>
     <div class="tags"><span class="tg">${esc(p.a)}</span>${p.th.filter(k=>D.themes[k]).map(k=>`<span class="tg t" style="--c:${esc(D.themes[k].c)}">${esc(D.themes[k].n)}</span>`).join("")}</div>
     <div class="ab">${esc(p.ab)||"<i>No abstract available.</i>"} <a href="${esc(p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open paper →</a></div>
-  </div>`).join(""):`<div class="empty">${src.length?"No entries match these filters.":"No listings yet. Run the update workflow in GitHub Actions."}</div>`;
+  </div>`).join(""):`<div class="empty">${src.length?"No entries match these filters.":"No matching SSRN working papers in this update."}</div>`;
 }
 const themeTag=name=>{const k=themeKey(name);return k?`<span class="tg t" style="--c:${esc(D.themes[k].c)}">${esc(D.themes[k].n)}</span>`:"General";};
 const sheetMsg=(status,what)=>status==="error"?`Could not load the ${what.toLowerCase()} listings. Please try again later.`
