@@ -46,6 +46,7 @@ def rx(words):
 THEME_RX = {k: rx(v["keywords"]) for k, v in CFG["themes"].items()}
 AREA_RX = {k: rx(v) for k, v in CFG["areas"].items()}
 SSRN_RX = rx(CFG["ssrn"]["keywords"])
+SSRN_CONTEXT_RX = rx(["firm*", "corporate", "company", "companies", "CEO*", "board*", "shareholder*"])
 
 
 def get(url, params=None):
@@ -226,7 +227,11 @@ def fetch_ssrn(since, until):
             if not p:
                 continue
             text = f"{p.get('t','')} {p.get('ab','')}".lower()
-            if not SSRN_RX.search(text):
+            # Keep papers that map to a classic corporate-finance area.
+            # For emerging themes, require explicit firm/corporate context.
+            classic_match = p.get("a") != "General"
+            themed_corporate_match = bool(p.get("th")) and bool(SSRN_CONTEXT_RX.search(text))
+            if not (classic_match or themed_corporate_match):
                 continue
             key = p.get("doi") or p.get("url") or p.get("t","").lower()
             if key in seen:
