@@ -14,6 +14,11 @@ on:
         required: false
         type: boolean
         default: false
+      publish:
+        description: "Commit generated files and trigger the production deploy"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:                 # never run two updates at once (they would overwrite each other)
   group: update-listings
@@ -78,7 +83,8 @@ jobs:
           BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
           SITE_URL: https://corporatefinanceupdates.com
 
-      - name: Commit data.json if it changed
+      - name: Commit generated files if publishing
+        if: github.event_name == 'schedule' || inputs.publish == true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
