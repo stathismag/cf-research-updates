@@ -41,12 +41,15 @@ def render_coverage(d):
     journals=", ".join(f"{esc(v)} ({esc(k)})" for k,v in d.get("journals",{}).items()) or "—"
     themes=", ".join(esc(v.get("n")) for v in d.get("themes",{}).values()) or "—"
     areas=", ".join(esc(a) for a in d.get("areas",[])) or "—"
+    health=d.get("source_health") or {}
+    degraded=[k.upper() for k in ("nber","ssrn") if (health.get(k) or {}).get("status")=="degraded"]
+    warning=(f'<p style="margin-top:10px"><b>Source status:</b> {", ".join(degraded)} temporarily degraded; last-known-good rows retained where possible.</p>' if degraded else "")
     return f"""<p><b>Journals included:</b> {journals}. No guarantee of completeness.</p>
 <p style="margin-top:10px"><b>NBER:</b> working papers identified from the versioned NBER Corporate Finance program cache (CF); Crossref supplies DOI metadata and day-level registration dates.</p>
 <p style="margin-top:10px"><b>SSRN:</b> recent DOI registrations under SSRN DOI prefix 10.2139 in Crossref, ranked and filtered for corporate-finance relevance using titles and available abstracts. Coverage is approximate.</p>
 <p style="margin-top:10px"><b>Theme tagging:</b> each paper is matched against keyword dictionaries for {themes}, and assigned one classic area ({areas}).</p>
 <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community and reviewed before publication.</p>
-<p style="margin-top:10px"><b>Last paper update:</b> {esc(d.get("generated") or "never")}.</p>"""
+<p style="margin-top:10px"><b>Last paper update:</b> {esc(d.get("generated") or "never")}.</p>{warning}"""
 
 def replace_block(text,name,content):
     s=f"<!-- STATIC_{name}_START -->"; e=f"<!-- STATIC_{name}_END -->"; pat=re.compile(re.escape(s)+r".*?"+re.escape(e),re.S)

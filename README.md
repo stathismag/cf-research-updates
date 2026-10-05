@@ -42,7 +42,7 @@ scripts/config.json          journals, themes, keyword rules
 ## Newsletter (Buttondown)
 
 Subscribers sign up on the site; Buttondown sends the confirmation email (double opt-in), handles unsubscribes and
-keeps the list. After each paper update, the Action emails the new papers to everyone on the list. Papers already
+keeps the list. Only a manual run with both `publish=true` and `send_email=true` emails the new papers. The schedule is paused until validation is complete. Papers already
 emailed are remembered in `sent.json`, so a rerun never sends the same paper twice.
 
 One-time setup:
@@ -51,7 +51,7 @@ One-time setup:
 2. Buttondown → Settings → API → copy the API key.
 3. Repo → Settings → Secrets and variables → Actions → New repository secret: `BUTTONDOWN_API_KEY` = that key.
 4. In `index.html`, set `const NEWSLETTER="USERNAME";` and commit. Until then, signups only go to Netlify Forms. (Currently set to `cf-research-updates`.)
-5. Run the workflow once from the Actions tab. The log's "Email the digest" step says `Sent '…' with N papers`.
+5. During validation, run with `publish=false` and `send_email=false`. After a full PASS, a production run can use `publish=true`; email requires `send_email=true` as well.
 
 The first run emails every paper currently in `data.json`. To start from the next update instead, put the current
 `url` values into `sent.json` first. Preview the email locally with `python scripts/send_digest.py --dry-run`; use
@@ -112,7 +112,7 @@ public dataset to only the overlap days.
 ## Working-paper sources
 
 - NBER: Corporate Finance program membership is read from a versioned cache in `cache/nber_cf_program.json`; Crossref supplies DOI metadata and day-level registration dates. A 21-day catch-up window retries late Crossref registrations.
-- SSRN: recent Financial Economics Network (FEN) listings filtered by the project's corporate-finance keyword rules.
+- SSRN: Crossref DOI prefix `10.2139`, using created-date discovery, relevance ranking, and a post-ranking cap.
 - The update workflow is fail-closed: source preflights, Python compilation, JSON/data validation, generated-site validation, newsletter dry-run, and JavaScript syntax checking all run before any generated files are committed.
 
 

@@ -307,12 +307,14 @@ function render(){
 }
 function cov(){
   const js=Object.entries(D.journals).map(([k,v])=>`${esc(v)} (${k})`).join(", ");
+  const degraded=["nber","ssrn"].filter(k=>D.source_health?.[k]?.status==="degraded").map(k=>k.toUpperCase());
+  const sourceWarn=degraded.length?`<p style="margin-top:10px"><b>Source status:</b> ${degraded.join(", ")} temporarily degraded; last-known-good rows retained where possible.</p>`:"";
   $("cov").innerHTML=`<p><b>Journals included:</b> ${js||"—"}. No guarantee of completeness.</p>
   <p style="margin-top:10px"><b>NBER:</b> working papers identified from the versioned NBER Corporate Finance program cache (CF); Crossref supplies DOI metadata and day-level registration dates.</p>
   <p style="margin-top:10px"><b>SSRN:</b> recent DOI registrations under SSRN DOI prefix 10.2139 in Crossref, ranked and filtered for corporate-finance relevance using titles and available abstracts. Coverage is approximate.</p>
   <p style="margin-top:10px"><b>Theme tagging:</b> each paper is matched against keyword dictionaries for ${Object.values(D.themes).map(t=>esc(t.n)).join(", ")||"—"}, and assigned one classic area (${D.areas.map(esc).join(", ")||"—"}).</p>
   <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community through the “Post a conference” and “Post a job” forms at the top and reviewed before they appear. Past events and expired deadlines drop off automatically.</p>
-  <p style="margin-top:10px"><b>Last paper update:</b> ${esc(D.generated)||"never"}.</p>`;
+  <p style="margin-top:10px"><b>Last paper update:</b> ${esc(D.generated)||"never"}.</p>${sourceWarn}`;
 }
 function subscribeEmail(e){
   const f=e.target;

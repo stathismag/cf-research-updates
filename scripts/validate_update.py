@@ -54,26 +54,30 @@ def main():
     health=d.get("source_health") or {}
     sh=health.get("ssrn") or {}
     nh=health.get("nber") or {}
-    if sh.get("status")!="ok" or int(sh.get("raw_rows",0))<=0:
-        fail(f"SSRN source unhealthy: {sh}")
     expected_ssrn_source=f"Crossref DOI prefix {CFG['ssrn']['prefix']}"
+    if sh.get("status") not in {"ok","degraded"}:
+        fail(f"SSRN source unhealthy: {sh}")
     if sh.get("source")!=expected_ssrn_source:
         fail(f"Unexpected SSRN source: {sh}; expected {expected_ssrn_source}")
-    if sh.get("complete") is not True:
-        fail(f"SSRN pagination incomplete: {sh}")
-    if int(sh.get("dropped_by_cap",0))>0:
-        print(f"WARNING: SSRN cap dropped {sh['dropped_by_cap']} of {sh.get('keyword_matches')} matches", file=sys.stderr)
+    if sh.get("status")=="ok":
+        if int(sh.get("raw_rows",0))<=0 or sh.get("complete") is not True:
+            fail(f"SSRN pagination incomplete: {sh}")
+        if int(sh.get("dropped_by_cap",0))>0:
+            print(f"WARNING: SSRN cap dropped {sh['dropped_by_cap']} of {sh.get('keyword_matches')} matches", file=sys.stderr)
+    else:
+        print(f"WARNING: SSRN source degraded; last-known-good rows retained: {sh}", file=sys.stderr)
     if int(sh.get("kept",-1)) != len(d["ssrn"]):
         fail(f"SSRN health/data count mismatch: {sh} vs {len(d['ssrn'])}")
     if nh.get("status") not in {"ok","degraded"}:
         fail(f"NBER source unhealthy: {nh}")
-    candidates=int(nh.get("candidates",0))
-    checked=int(nh.get("metadata_checked",0))
-    unresolved=int(nh.get("unresolved",0))
-    if candidates < 0 or checked < 0 or unresolved < 0 or checked + unresolved != candidates:
-        fail(f"NBER source counts inconsistent: {nh}")
-    if nh.get("status")=="degraded":
-        print(f"WARNING: NBER source degraded but journal/SSRN update remains valid: {nh}", file=sys.stderr)
+    if nh.get("status")=="ok":
+        candidates=int(nh.get("candidates",0))
+        checked=int(nh.get("metadata_checked",0))
+        unresolved=int(nh.get("unresolved",0))
+        if candidates < 0 or checked < 0 or unresolved < 0 or checked + unresolved != candidates:
+            fail(f"NBER source counts inconsistent: {nh}")
+    else:
+        print(f"WARNING: NBER source degraded; last-known-good rows retained: {nh}", file=sys.stderr)
     if int(nh.get("kept",-1)) != len(d["nber"]):
         fail(f"NBER health/data count mismatch: {nh} vs {len(d['nber'])}")
 

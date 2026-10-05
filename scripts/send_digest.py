@@ -55,6 +55,10 @@ def build(data, pubs, nber, ssrn):
         + (f", and {len(ssrn)} SSRN working papers" if ssrn else "")
         + ", tagged by theme and area.\n"
     ]
+    health = data.get("source_health") or {}
+    degraded = [name.upper() for name in ("nber","ssrn") if (health.get(name) or {}).get("status")=="degraded"]
+    if degraded:
+        parts.append("> **Source-status note:** " + ", ".join(degraded) + " is temporarily degraded; last-known-good rows were retained where possible.")
     shown = set()
     for key, t in themes.items():
         rows = [p for p in pubs if key in p.get("th", [])]

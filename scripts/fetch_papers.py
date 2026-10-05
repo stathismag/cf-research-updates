@@ -402,6 +402,28 @@ def check():
         f"age {age} days"
     )
 
+
+def previous_source_rows(key, since, until, grace_days=0):
+    """Carry forward last-known-good optional-source rows that still fit the new window."""
+    if not OUT.exists():
+        return []
+    try:
+        old = json.loads(OUT.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+    lo = since - dt.timedelta(days=grace_days)
+    rows = []
+    for p in old.get(key, []) or []:
+        try:
+            day = dt.date.fromisoformat(p.get("d", ""))
+        except (TypeError, ValueError):
+            continue
+        if lo <= day <= until:
+            rows.append(p)
+    return rows
+
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="verify ISSNs against Crossref")
@@ -415,13 +437,35 @@ def main():
     print("Journals:")
     pubs = fetch_journals(since.isoformat(), until.isoformat())
     if CFG["ssrn"].get("enabled", True):
-        ssrn, ssrn_health = fetch_ssrn(since.isoformat(), until.isoformat())
+        try:
+            ssrn, ssrn_health = fetch_ssrn(since.isoformat(), until.isoformat())
+        except Exception as e:
+            ssrn = previous_source_rows("ssrn", since, until)
+            ssrn_health = {
+                "status": "degraded",
+                "source": f"Crossref DOI prefix {CFG['ssrn']['prefix']}",
+                "error": str(e),
+                "kept": len(ssrn),
+            }
+            print(f"  WARNING: SSRN degraded; carrying {len(ssrn)} last-known-good rows: {e}", file=sys.stderr)
     else:
-        ssrn, ssrn_health = [], {"status": "disabled", "raw_rows": 0, "kept": 0}
+        ssrn, ssrn_health = [], {"status": "disabled", "kept": 0}
+
     if CFG.get("nber", {}).get("enabled", True):
-        nber, nber_health = fetch_nber(since.isoformat(), until.isoformat())
+        try:
+            nber, nber_health = fetch_nber(since.isoformat(), until.isoformat())
+        except Exception as e:
+            grace = int(CFG.get("nber", {}).get("catchup_days", 21))
+            nber = previous_source_rows("nber", since, until, grace_days=grace)
+            nber_health = {
+                "status": "degraded",
+                "source": "repo NBER CF cache + Crossref",
+                "error": str(e),
+                "kept": len(nber),
+            }
+            print(f"  WARNING: NBER degraded; carrying {len(nber)} last-known-good rows: {e}", file=sys.stderr)
     else:
-        nber, nber_health = [], {"status": "disabled", "program_ids": 0, "metadata_checked": 0, "kept": 0}
+        nber, nber_health = [], {"status": "disabled", "kept": 0}
 
     nber_titles = {title_key(p.get("t")) for p in nber if p.get("t")}
     before = len(ssrn)
