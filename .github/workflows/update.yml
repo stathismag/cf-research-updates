@@ -66,6 +66,19 @@ jobs:
       - name: Validate fetched data
         run: python scripts/validate_update.py
 
+      - name: Require healthy optional sources in validation mode
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("data.json").read_text(encoding="utf-8"))
+          h=d.get("source_health") or {}
+          bad={k:(h.get(k) or {}) for k in ("nber","ssrn") if (h.get(k) or {}).get("status")!="ok"}
+          if bad:
+              raise SystemExit(f"Optional source validation failed: {bad}")
+          print("OPTIONAL SOURCE HEALTH PASS: NBER=ok, SSRN=ok")
+          PY
+
       - name: Build crawlable site and archive
         run: python scripts/build_site.py
 
