@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       CROSSREF_EMAIL: ${{ secrets.CROSSREF_EMAIL }}   # Settings → Secrets and variables → Actions
     steps:
