@@ -7,8 +7,10 @@ Fetch new corporate-finance research from Crossref and write data.json.
   python scripts/fetch_papers.py --days 30  override the look-back window
 """
 import argparse
+import csv
 import datetime as dt
 import html
+import io
 import json
 import os
 import re
@@ -309,12 +311,12 @@ def fetch_ssrn(since, until):
     return kept, {"status": "ok", "raw_rows": raw_rows, "kept": len(kept)}
 
 
-def _fetch_html(url, params=None, label="HTML source"):
+def _fetch_text(url, label):
     last = None
     for attempt in range(4):
         try:
-            r = requests.get(url, params=params, headers=HTML_HEADERS, timeout=90)
-            if r.status_code == 200:
+            r = requests.get(url, headers=HTML_HEADERS, timeout=90)
+            if r.status_code == 200 and r.text.strip():
                 return r.text
             last = f"HTTP {r.status_code}"
         except requests.RequestException as e:
@@ -323,80 +325,142 @@ def _fetch_html(url, params=None, label="HTML source"):
     raise RuntimeError(f"{label} request failed: {last}")
 
 
-def nber_program_ids():
-    """Return current NBER Corporate Finance Program working-paper IDs."""
-    cfg = CFG["nber"]
-    html_text = _fetch_html(
-        cfg["program_url"],
-        params={"perPage": cfg.get("per_page", 100)},
-        label="NBER Corporate Finance Program",
-    )
-    soup = BeautifulSoup(html_text, "html.parser")
-    ids = []
-    for a in soup.find_all("a", href=True):
-        m = re.search(r"/papers/(w\d+)(?:$|[?#])", a.get("href", ""), re.I)
-        if m:
-            wp = m.group(1).lower()
-            if wp not in ids:
-                ids.append(wp)
-    minimum = cfg.get("min_program_ids", 10)
-    if len(ids) < minimum:
+def _nber_issue_overlaps(value, since_d, until_d):
+    value = clean(value)
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%B %Y", "%b %Y"):
+        try:
+            d = dt.datetime.strptime(value, fmt).date()
+            if fmt in ("%B %Y", "%b %Y"):
+                if d.month == 12:
+                    month_end = dt.date(d.year + 1, 1, 1) - dt.timedelta(days=1)
+                else:
+                    month_end = dt.date(d.year, d.month + 1, 1) - dt.timedelta(days=1)
+                return not (month_end < since_d or d > until_d)
+            return since_d <= d <= until_d
+        except ValueError:
+            pass
+    return False
+
+
+def _nber_tsv(name):
+    base = CFG["nber"]["metadata_base"].rstrip("/")
+    text = _fetch_text(f"{base}/{name}.tsv", f"NBER {name}.tsv")
+    rows = list(csv.DictReader(io.StringIO(text), delimiter="\t"))
+    if not rows:
+        raise RuntimeError(f"NBER {name}.tsv parsed to zero rows")
+    return rows
+
+
+def nber_candidates(since, until):
+    """Return current-window candidates in the official NBER Corporate Finance program."""
+    since_d, until_d = dt.date.fromisoformat(since), dt.date.fromisoformat(until)
+    prog_rows = _nber_tsv("prog")
+    ref_rows = _nber_tsv("ref")
+    cf_ids = {
+        clean(r.get("paper")).lower()
+        for r in prog_rows
+        if clean(r.get("program")).upper() == CFG["nber"].get("program_code", "CF")
+    }
+    if len(cf_ids) < CFG["nber"].get("min_program_ids", 100):
         raise RuntimeError(
-            f"NBER Corporate Finance Program parser found only {len(ids)} paper IDs "
-            f"(minimum expected {minimum}); refusing to publish."
+            f"NBER program metadata has only {len(cf_ids)} Corporate Finance papers; refusing to publish."
         )
-    return ids
+
+    candidates = []
+    latest_issue = None
+    for r in ref_rows:
+        paper = clean(r.get("paper")).lower()
+        if paper not in cf_ids or not paper.startswith("w"):
+            continue
+        issue = clean(r.get("issue_date"))
+        # Track latest parsable issue month/date for freshness checks.
+        for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%B %Y", "%b %Y"):
+            try:
+                d = dt.datetime.strptime(issue, fmt).date()
+                latest_issue = d if latest_issue is None or d > latest_issue else latest_issue
+                break
+            except ValueError:
+                pass
+        if _nber_issue_overlaps(issue, since_d, until_d):
+            candidates.append(r)
+
+    if latest_issue is None or latest_issue < until_d - dt.timedelta(days=120):
+        raise RuntimeError(
+            f"NBER metadata appears stale (latest issue date: {latest_issue}); refusing to publish."
+        )
+    return candidates, len(cf_ids), latest_issue
 
 
 def fetch_nber(since, until):
-    """Fetch NBER Corporate Finance Program papers registered in the update window."""
+    """Fetch current-window NBER Corporate Finance papers using official NBER metadata."""
     cfg = CFG["nber"]
     since_d, until_d = dt.date.fromisoformat(since), dt.date.fromisoformat(until)
-    ids = nber_program_ids()
-    out, checked = [], 0
-    seen = set()
-    latest_seen = None
+    candidates, program_count, latest_issue = nber_candidates(since, until)
+    out, checked, seen = [], 0, set()
 
-    for wp in ids:
-        d = get(f"{API}/works/10.3386/{wp}")
+    # Abstract metadata is official and avoids relying on Crossref for abstracts.
+    abs_map = {
+        clean(r.get("paper")).lower(): clean(r.get("abstract"))
+        for r in _nber_tsv("abs")
+    }
+
+    for r in candidates:
+        paper = clean(r.get("paper")).lower()
+        doi = clean(r.get("doi")) or f"10.3386/{paper}"
+        d = get(f"{API}/works/{doi}")
         if not d or not d.get("message"):
             continue
         checked += 1
-        p = parse(d["message"], "NBER")
-        if not p:
-            continue
+        msg = d["message"]
+        created = (msg.get("created") or {}).get("date-time", "")[:10]
         try:
-            pdate = dt.date.fromisoformat(p["d"])
-        except (TypeError, ValueError):
+            created_d = dt.date.fromisoformat(created)
+        except ValueError:
             continue
-        latest_seen = pdate if latest_seen is None or pdate > latest_seen else latest_seen
-        if not (since_d <= pdate <= until_d):
+        if not (since_d <= created_d <= until_d):
             continue
-        if p["doi"] in seen:
-            continue
-        seen.add(p["doi"])
-        p["url"] = f"https://www.nber.org/papers/{wp}"
-        p["wp"] = wp[1:]
-        out.append(p)
 
-    if checked < min(10, cfg.get("min_program_ids", 10)):
-        raise RuntimeError(
-            f"NBER metadata check succeeded for only {checked} program papers; refusing to publish."
-        )
-    if latest_seen is None or latest_seen < until_d - dt.timedelta(days=90):
-        raise RuntimeError(
-            f"NBER program metadata appears stale (latest Crossref registration: {latest_seen}); "
-            "refusing to publish."
-        )
+        title = clean(r.get("title")) or clean((msg.get("title") or [""])[0])
+        if not title or SKIP_TITLE.search(title):
+            continue
+        authors = clean(r.get("author")) or "—"
+        ab = abs_map.get(paper, "")
+        limit = CFG.get("abstract_chars", 700)
+        if len(ab) > limit:
+            ab = ab[:limit].rsplit(" ", 1)[0] + "…"
+        themes, area = tag(f"{title} {ab}")
+        doi = doi.lower()
+        if doi in seen:
+            continue
+        seen.add(doi)
+        out.append({
+            "j": "NBER",
+            "t": title,
+            "d": created_d.isoformat(),
+            "a": area,
+            "th": themes,
+            "au": authors,
+            "ab": ab,
+            "url": f"https://www.nber.org/papers/{paper}",
+            "doi": doi,
+            "wp": paper[1:],
+        })
 
+    if candidates and checked == 0:
+        raise RuntimeError("NBER current-window candidates found but none resolved in Crossref.")
     out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
-    print(f"  NBER  {len(out):3d} recent Corporate Finance papers from {len(ids)} program IDs", flush=True)
+    print(
+        f"  NBER  {len(out):3d} kept from {len(candidates)} current-month CF candidates "
+        f"({program_count} total CF papers)",
+        flush=True,
+    )
     return out[: cfg.get("max_items", 100)], {
         "status": "ok",
-        "program_ids": len(ids),
+        "program_ids": program_count,
         "metadata_checked": checked,
+        "candidates": len(candidates),
         "kept": len(out),
-        "latest_seen": latest_seen.isoformat() if latest_seen else None,
+        "latest_seen": latest_issue.isoformat(),
     }
 
 def window(args):
@@ -450,8 +514,14 @@ def check():
         raise RuntimeError("SSRN FEN preflight found no paper links")
     print(f"SSRN  FEN preflight: {len(ssrn_links)} paper links")
 
-    ids = nber_program_ids()
-    print(f"NBER  Corporate Finance Program preflight: {len(ids)} working-paper IDs")
+    today = dt.date.today()
+    candidates, total_cf, latest_issue = nber_candidates(
+        (today - dt.timedelta(days=31)).isoformat(), today.isoformat()
+    )
+    print(
+        f"NBER  official metadata preflight: {total_cf} CF papers, "
+        f"{len(candidates)} recent candidates, latest issue {latest_issue}"
+    )
 
 def main():
     ap = argparse.ArgumentParser()

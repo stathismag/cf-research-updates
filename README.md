@@ -113,6 +113,6 @@ public dataset to only the overlap days.
 
 ## Working-paper sources
 
-- NBER: papers listed in the NBER Corporate Finance Program, with Crossref metadata used for the update-window date and bibliographic fields.
+- NBER: official weekly NBER Working Paper metadata (`prog.tsv`, `ref.tsv`, `abs.tsv`) is used to identify Corporate Finance program papers (`CF`). Crossref registration dates provide day-level filtering for the bi-weekly window.
 - SSRN: recent Financial Economics Network (FEN) listings filtered by the project's corporate-finance keyword rules.
 - The update workflow is fail-closed: source preflights, Python compilation, JSON/data validation, generated-site validation, newsletter dry-run, and JavaScript syntax checking all run before any generated files are committed.

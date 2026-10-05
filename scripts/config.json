@@ -389,9 +389,9 @@
   },
   "nber": {
     "enabled": true,
-    "program_url": "https://www.nber.org/programs-projects/programs-working-groups/corporate-finance",
-    "per_page": 100,
-    "min_program_ids": 10,
+    "metadata_base": "https://data.nber.org/nber_paper_chapter_metadata/tsv",
+    "program_code": "CF",
+    "min_program_ids": 100,
     "max_items": 100
   }
 }
