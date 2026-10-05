@@ -54,6 +54,10 @@ def main():
     nh=health.get("nber") or {}
     if sh.get("status")!="ok" or int(sh.get("raw_rows",0))<=0:
         fail(f"SSRN source unhealthy: {sh}")
+    if sh.get("source")!="OpenAlex repository":
+        fail(f"Unexpected SSRN source: {sh}")
+    if int(sh.get("raw_rows",0)) != int(sh.get("total_available",-1)):
+        fail(f"SSRN pagination incomplete: {sh}")
     minimum=int((CFG.get("nber") or {}).get("min_program_ids",10))
     if nh.get("status")!="ok" or int(nh.get("program_ids",0))<minimum:
         fail(f"NBER source unhealthy: {nh}")
