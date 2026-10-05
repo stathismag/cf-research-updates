@@ -45,13 +45,14 @@ def entry(p, journals, abstract=False):
     return out
 
 
-def build(data, pubs, ssrn):
+def build(data, pubs, nber, ssrn):
     journals, themes = data["journals"], data["themes"]
     w = data.get("window") or {}
     subject = f"Corporate Finance Research Updates: {w.get('from', '')} to {w.get('to', '')}".strip(": ")
     parts = [
         f"{len(pubs)} new journal articles"
-        + (f" and {len(ssrn)} SSRN working papers" if ssrn else "")
+        + (f", {len(nber)} NBER working papers" if nber else "")
+        + (f", and {len(ssrn)} SSRN working papers" if ssrn else "")
         + ", tagged by theme and area.\n"
     ]
     shown = set()
@@ -68,6 +69,8 @@ def build(data, pubs, ssrn):
     other = [p for p in rest if p.get("a") not in data.get("areas", [])]
     if other:
         parts.append("## Other\n\n" + "\n\n".join(entry(p, journals) for p in other))
+    if nber:
+        parts.append("## NBER Working Papers\n\n" + "\n\n".join(entry(p, journals, True) for p in nber))
     if ssrn:
         parts.append("## SSRN Working Papers\n\n" + "\n\n".join(entry(p, journals, True) for p in ssrn))
     parts.append(f"---\n\nBrowse, filter and search everything at [{SITE.split('//')[-1]}]({SITE}).\n\nCurated by [Efstathios Magerakis](https://smagerakis.gr).")
@@ -83,12 +86,13 @@ def main():
     data = json.loads(DATA.read_text(encoding="utf-8"))
     sent = set(json.loads(SENT.read_text(encoding="utf-8"))) if SENT.exists() else set()
     pubs = [p for p in data.get("pubs", []) if p.get("url") and p["url"] not in sent]
+    nber = [p for p in data.get("nber", []) if p.get("url") and p["url"] not in sent]
     ssrn = [p for p in data.get("ssrn", []) if p.get("url") and p["url"] not in sent]
-    papers = pubs + ssrn
+    papers = pubs + nber + ssrn
     if not papers:
         print("No new papers since the last digest; nothing to send.")
         return 0
-    subject, body = build(data, pubs, ssrn)
+    subject, body = build(data, pubs, nber, ssrn)
 
     if args.dry_run:
         print(f"Subject: {subject}\n\n{body}")

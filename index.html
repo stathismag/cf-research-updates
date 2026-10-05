@@ -127,14 +127,14 @@ dialog input,dialog select{padding:9px 11px;border:1px solid var(--line);border-
     </div>
     <div class="hero">
       <h1 class="serif">New corporate finance research, <em>every two weeks</em>, organised by the risks firms actually face.</h1>
-      <p>Online-first articles from leading finance journals, new SSRN working papers, conferences and jobs, tagged by classic area and by emerging theme: climate uncertainty, biodiversity, cybersecurity, crypto, political geography and more.</p>
+      <p>Online-first articles from leading finance journals, NBER Corporate Finance working papers, new SSRN working papers, conferences and jobs, tagged by classic area and by emerging theme: climate uncertainty, biodiversity, cybersecurity, crypto, political geography and more.</p>
       <form class="sub" name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return subscribeEmail(event)">
         <input type="hidden" name="form-name" value="subscribe">
         <p hidden><label>Leave empty: <input name="bot-field"></label></p>
         <input name="email" type="email" required placeholder="you@university.edu">
         <button type="submit">Subscribe</button>
       </form>
-      <div class="stats" id="stats"><!-- STATIC_STATS_START --><div class="stat"><b>54</b><span>Journal articles</span></div><div class="stat"><b>0</b><span>SSRN papers</span></div><div class="stat"><b>0</b><span>Conferences</span></div><div class="stat"><b>0</b><span>Job openings</span></div><!-- STATIC_STATS_END --></div>
+      <div class="stats" id="stats"><!-- STATIC_STATS_START --><div class="stat"><b>54</b><span>Journal articles</span></div><div class="stat"><b>0</b><span>NBER papers</span></div><div class="stat"><b>0</b><span>SSRN papers</span></div><div class="stat"><b>0</b><span>Conferences</span></div><div class="stat"><b>0</b><span>Job openings</span></div><!-- STATIC_STATS_END --></div>
     </div>
   </div>
 </header>
@@ -200,7 +200,7 @@ const NEWSLETTER="cf-research-updates";
 
 // Conferences and jobs live in conferences.json and jobs.json (see README). Submissions arrive via Netlify Forms.
 
-let D={generated:null,window:null,journals:{},themes:{},areas:[],pubs:[],ssrn:[],error:""};
+let D={generated:null,window:null,journals:{},themes:{},areas:[],pubs:[],nber:[],ssrn:[],source_health:{},error:""};
 let M={conferences:[],jobs:[],confStatus:"ok",jobStatus:"ok"};
 let S={tab:"pubs",q:"",j:"",a:"",th:"",sort:"date"};
 const $=id=>document.getElementById(id);
@@ -239,26 +239,26 @@ async function load(){
 
 /* ---- rendering ---- */
 function stats(){
-  $("stats").innerHTML=[[D.pubs.length,"Journal articles"],[D.ssrn.length,"SSRN papers"],[liveConfs().length,"Conferences"],[liveJobs().length,"Job openings"]]
+  $("stats").innerHTML=[[D.pubs.length,"Journal articles"],[D.nber.length,"NBER papers"],[D.ssrn.length,"SSRN papers"],[liveConfs().length,"Conferences"],[liveJobs().length,"Job openings"]]
     .map(([n,l])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
   $("period").textContent=D.window?`Share of new papers per theme, ${period()}. Click a theme to filter.`:"Theme counts appear after the first update has run.";
 }
 function radar(){
-  const all=[...D.pubs,...D.ssrn],keys=Object.keys(D.themes);
+  const all=[...D.pubs,...D.nber,...D.ssrn],keys=Object.keys(D.themes);
   const max=Math.max(1,...keys.map(k=>all.filter(p=>p.th.includes(k)).length));
   $("radar").innerHTML=keys.map(k=>{const t=D.themes[k],n=all.filter(p=>p.th.includes(k)).length;
     return `<div class="tc ${S.th===k?"on":""}" style="--c:${esc(t.c)}" onclick="setTheme('${k}')">
       <div class="th"><b>${esc(t.n)}</b><span class="cnt">${n}</span></div>
       <div class="td">${esc(t.d)}</div><div class="bar"><i style="width:${n/max*100}%"></i></div></div>`}).join("");
 }
-function setTheme(k){S.th=S.th===k?"":k;if(S.tab!=="pubs"&&S.tab!=="ssrn")S.tab="pubs";radar();render()}
+function setTheme(k){S.th=S.th===k?"":k;if(!["pubs","nber","ssrn"].includes(S.tab))S.tab="pubs";radar();render()}
 function filt(list){
   const q=S.q.toLowerCase();
   const r=list.filter(p=>(!S.j||p.j===S.j)&&(!S.a||p.a===S.a)&&(!S.th||p.th.includes(S.th))&&(!q||(p.t+" "+p.ab+" "+p.au).toLowerCase().includes(q)));
   return r.sort((x,y)=>S.sort==="date"?y.d.localeCompare(x.d):S.sort==="journal"?x.j.localeCompare(y.j):x.t.localeCompare(y.t));
 }
 function tabs(){
-  const T=[["pubs","Publications",D.pubs.length],["ssrn","SSRN",D.ssrn.length],["conf","Conferences",liveConfs().length],["jobs","Jobs",liveJobs().length]];
+  const T=[["pubs","Publications",D.pubs.length],["nber","NBER",D.nber.length],["ssrn","SSRN",D.ssrn.length],["conf","Conferences",liveConfs().length],["jobs","Jobs",liveJobs().length]];
   $("tabs").innerHTML=T.map(([k,l,n])=>`<button class="tab ${S.tab===k?"on":""}" onclick="S.tab='${k}';render()">${l}<span>${n}</span></button>`).join("");
 }
 function controls(isPub){
@@ -271,14 +271,15 @@ function controls(isPub){
   </div><div class="meta" id="meta"></div><div id="list"></div>`;
 }
 function renderList(){
-  const src=S.tab==="pubs"?D.pubs:D.ssrn,r=filt(src);
-  $("meta").textContent=`${r.length} of ${src.length} ${S.tab==="pubs"?"online-first articles":"working papers"} · ${period()}`;
+  const src=S.tab==="pubs"?D.pubs:S.tab==="nber"?D.nber:D.ssrn,r=filt(src);
+  const kind=S.tab==="pubs"?"online-first articles":S.tab==="nber"?"NBER Corporate Finance working papers":"SSRN working papers";
+  $("meta").textContent=`${r.length} of ${src.length} ${kind} · ${period()}`;
   $("list").innerHTML=r.length?r.map(p=>`<div class="item" onclick="this.classList.toggle('open')">
-    <div class="row1"><span class="jb" title="${esc(D.journals[p.j]||"SSRN")}">${esc(p.j)}</span><span class="ti">${esc(p.t)}</span><span class="dt">${esc(p.d)}</span></div>
+    <div class="row1"><span class="jb" title="${esc(D.journals[p.j]||(p.j==="NBER"?"NBER Working Paper":"SSRN"))}">${esc(p.j)}</span><span class="ti">${esc(p.t)}</span><span class="dt">${esc(p.d)}</span></div>
     <div class="au">${esc(p.au)}</div>
     <div class="tags"><span class="tg">${esc(p.a)}</span>${p.th.filter(k=>D.themes[k]).map(k=>`<span class="tg t" style="--c:${esc(D.themes[k].c)}">${esc(D.themes[k].n)}</span>`).join("")}</div>
     <div class="ab">${esc(p.ab)||"<i>No abstract available.</i>"} <a href="${esc(p.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Open paper →</a></div>
-  </div>`).join(""):`<div class="empty">${src.length?"No entries match these filters.":"No matching SSRN working papers in this update."}</div>`;
+  </div>`).join(""):`<div class="empty">${src.length?"No entries match these filters.":S.tab==="nber"?"No NBER Corporate Finance working papers in this update.":"No matching SSRN working papers in this update."}</div>`;
 }
 const themeTag=name=>{const k=themeKey(name);return k?`<span class="tg t" style="--c:${esc(D.themes[k].c)}">${esc(D.themes[k].n)}</span>`:"General";};
 const sheetMsg=(status,what)=>status==="error"?`Could not load the ${what.toLowerCase()} listings. Please try again later.`
@@ -286,7 +287,7 @@ const sheetMsg=(status,what)=>status==="error"?`Could not load the ${what.toLowe
 function render(){
   tabs();
   const warn=D.error?`<div class="warn">${esc(D.error)}</div>`:"";
-  if(S.tab==="pubs"||S.tab==="ssrn"){$("panel").innerHTML=warn+controls(S.tab==="pubs");renderList();return}
+  if(S.tab==="pubs"||S.tab==="nber"||S.tab==="ssrn"){$("panel").innerHTML=warn+controls(S.tab==="pubs");renderList();return}
   if(S.tab==="conf"){
     const rows=liveConfs().sort((a,b)=>(a.date||"9").localeCompare(b.date||"9"));
     $("panel").innerHTML=warn+(rows.length?`<table><tr><th>Event</th><th>Organiser</th><th>Location</th><th>Dates</th><th>Submission deadline</th><th>Theme</th></tr>${rows.map(c=>`<tr>
@@ -307,7 +308,8 @@ function render(){
 function cov(){
   const js=Object.entries(D.journals).map(([k,v])=>`${esc(v)} (${k})`).join(", ");
   $("cov").innerHTML=`<p><b>Journals included:</b> ${js||"—"}. No guarantee of completeness.</p>
-  <p style="margin-top:10px"><b>SSRN:</b> new working papers whose DOI was registered by SSRN in the period and whose title matches corporate-finance keywords. Abstracts are usually unavailable for SSRN entries, so treat the SSRN list as approximate.</p>
+  <p style="margin-top:10px"><b>NBER:</b> working papers listed by the NBER Corporate Finance Program whose Crossref registration date falls in the update window.</p>
+  <p style="margin-top:10px"><b>SSRN:</b> recent papers from the public SSRN Financial Economics Network (FEN), filtered using corporate-finance keywords. Coverage is intentionally selective rather than exhaustive.</p>
   <p style="margin-top:10px"><b>Theme tagging:</b> each paper is matched against keyword dictionaries for ${Object.values(D.themes).map(t=>esc(t.n)).join(", ")||"—"}, and assigned one classic area (${D.areas.map(esc).join(", ")||"—"}).</p>
   <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community through the “Post a conference” and “Post a job” forms at the top and reviewed before they appear. Past events and expired deadlines drop off automatically.</p>
   <p style="margin-top:10px"><b>Last paper update:</b> ${esc(D.generated)||"never"}.</p>`;

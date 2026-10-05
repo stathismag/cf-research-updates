@@ -386,5 +386,12 @@
       "market reaction",
       "abnormal return*"
     ]
+  },
+  "nber": {
+    "enabled": true,
+    "program_url": "https://www.nber.org/programs-projects/programs-working-groups/corporate-finance",
+    "per_page": 100,
+    "min_program_ids": 10,
+    "max_items": 100
   }
 }

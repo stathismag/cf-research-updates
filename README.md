@@ -109,3 +109,10 @@ Each successful update also writes a permanent `issues/YYYY-MM-DD/` snapshot, re
 The default fetch window is rerun-safe. It uses the earlier of (a) the normal bi-weekly lookback and (b) the previous
 issue end minus the configured overlap. Re-running the workflow shortly after an update therefore cannot collapse the
 public dataset to only the overlap days.
+
+
+## Working-paper sources
+
+- NBER: papers listed in the NBER Corporate Finance Program, with Crossref metadata used for the update-window date and bibliographic fields.
+- SSRN: recent Financial Economics Network (FEN) listings filtered by the project's corporate-finance keyword rules.
+- The update workflow is fail-closed: source preflights, Python compilation, JSON/data validation, generated-site validation, newsletter dry-run, and JavaScript syntax checking all run before any generated files are committed.

@@ -26,6 +26,7 @@ OUT = ROOT / "data.json"
 API = "https://api.crossref.org"
 CONTACT = os.environ.get("CROSSREF_EMAIL") or CFG["contact_email"]  # secret in the Action, config.json locally
 HEADERS = {"User-Agent": f"cf-research-updates/1.0 (mailto:{CONTACT})"}
+HTML_HEADERS = {**HEADERS, "Accept": "text/html,application/xhtml+xml", "Accept-Language": "en-US,en;q=0.8"}
 SKIP_TITLE = re.compile(
     r"^(issue information|editorial board|front matter|back matter|erratum|corrigendum|retraction|"
     r"announcement|masthead|table of contents|index to volume|title page|editor'?s? (note|introduction)|"
@@ -304,7 +305,99 @@ def fetch_ssrn(since, until):
 
     out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
     print(f"  SSRN  {len(out):3d} kept of {raw_rows} dated FEN rows", flush=True)
-    return out[: cfg.get("max_items", 200)]
+    kept = out[: cfg.get("max_items", 200)]
+    return kept, {"status": "ok", "raw_rows": raw_rows, "kept": len(kept)}
+
+
+def _fetch_html(url, params=None, label="HTML source"):
+    last = None
+    for attempt in range(4):
+        try:
+            r = requests.get(url, params=params, headers=HTML_HEADERS, timeout=90)
+            if r.status_code == 200:
+                return r.text
+            last = f"HTTP {r.status_code}"
+        except requests.RequestException as e:
+            last = e
+        time.sleep(4 * (attempt + 1))
+    raise RuntimeError(f"{label} request failed: {last}")
+
+
+def nber_program_ids():
+    """Return current NBER Corporate Finance Program working-paper IDs."""
+    cfg = CFG["nber"]
+    html_text = _fetch_html(
+        cfg["program_url"],
+        params={"perPage": cfg.get("per_page", 100)},
+        label="NBER Corporate Finance Program",
+    )
+    soup = BeautifulSoup(html_text, "html.parser")
+    ids = []
+    for a in soup.find_all("a", href=True):
+        m = re.search(r"/papers/(w\d+)(?:$|[?#])", a.get("href", ""), re.I)
+        if m:
+            wp = m.group(1).lower()
+            if wp not in ids:
+                ids.append(wp)
+    minimum = cfg.get("min_program_ids", 10)
+    if len(ids) < minimum:
+        raise RuntimeError(
+            f"NBER Corporate Finance Program parser found only {len(ids)} paper IDs "
+            f"(minimum expected {minimum}); refusing to publish."
+        )
+    return ids
+
+
+def fetch_nber(since, until):
+    """Fetch NBER Corporate Finance Program papers registered in the update window."""
+    cfg = CFG["nber"]
+    since_d, until_d = dt.date.fromisoformat(since), dt.date.fromisoformat(until)
+    ids = nber_program_ids()
+    out, checked = [], 0
+    seen = set()
+    latest_seen = None
+
+    for wp in ids:
+        d = get(f"{API}/works/10.3386/{wp}")
+        if not d or not d.get("message"):
+            continue
+        checked += 1
+        p = parse(d["message"], "NBER")
+        if not p:
+            continue
+        try:
+            pdate = dt.date.fromisoformat(p["d"])
+        except (TypeError, ValueError):
+            continue
+        latest_seen = pdate if latest_seen is None or pdate > latest_seen else latest_seen
+        if not (since_d <= pdate <= until_d):
+            continue
+        if p["doi"] in seen:
+            continue
+        seen.add(p["doi"])
+        p["url"] = f"https://www.nber.org/papers/{wp}"
+        p["wp"] = wp[1:]
+        out.append(p)
+
+    if checked < min(10, cfg.get("min_program_ids", 10)):
+        raise RuntimeError(
+            f"NBER metadata check succeeded for only {checked} program papers; refusing to publish."
+        )
+    if latest_seen is None or latest_seen < until_d - dt.timedelta(days=90):
+        raise RuntimeError(
+            f"NBER program metadata appears stale (latest Crossref registration: {latest_seen}); "
+            "refusing to publish."
+        )
+
+    out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
+    print(f"  NBER  {len(out):3d} recent Corporate Finance papers from {len(ids)} program IDs", flush=True)
+    return out[: cfg.get("max_items", 100)], {
+        "status": "ok",
+        "program_ids": len(ids),
+        "metadata_checked": checked,
+        "kept": len(out),
+        "latest_seen": latest_seen.isoformat() if latest_seen else None,
+    }
 
 def window(args):
     today = dt.date.today()
@@ -332,9 +425,33 @@ def check():
     for code, j in CFG["journals"].items():
         d = get(f"{API}/journals/{j['issn']}")
         name = d["message"]["title"] if d else "NOT FOUND - fix this ISSN"
+        if not d:
+            raise RuntimeError(f"{code} ISSN {j['issn']} not found in Crossref")
         print(f"{code:5s} {j['issn']:10s} {name}")
+
     ssrn = CFG["ssrn"]
-    print(f"SSRN  FEN journal_id={ssrn.get('journal_id', 203)} direct public SSRN browse source")
+    base = "https://papers.ssrn.com/sol3/Jeljour_results.cfm"
+    html_text = _fetch_html(
+        base,
+        params={
+            "Network": "yes", "form_name": "journalBrowse",
+            "journal_id": str(ssrn.get("journal_id", 203)),
+            "lim": "false", "orderBy": "ab_approval_date",
+            "orderDir": "desc", "strSelectedOption": "6", "npage": "1",
+        },
+        label="SSRN FEN",
+    )
+    soup = BeautifulSoup(html_text, "html.parser")
+    ssrn_links = [
+        a for a in soup.find_all("a", href=True)
+        if re.search(r"(?:abstract=|abstract_id=)\d+", a.get("href", ""), re.I)
+    ]
+    if not ssrn_links:
+        raise RuntimeError("SSRN FEN preflight found no paper links")
+    print(f"SSRN  FEN preflight: {len(ssrn_links)} paper links")
+
+    ids = nber_program_ids()
+    print(f"NBER  Corporate Finance Program preflight: {len(ids)} working-paper IDs")
 
 def main():
     ap = argparse.ArgumentParser()
@@ -348,7 +465,14 @@ def main():
     print(f"Window {since} to {until}")
     print("Journals:")
     pubs = fetch_journals(since.isoformat(), until.isoformat())
-    ssrn = fetch_ssrn(since.isoformat(), until.isoformat()) if CFG["ssrn"].get("enabled", True) else []
+    if CFG["ssrn"].get("enabled", True):
+        ssrn, ssrn_health = fetch_ssrn(since.isoformat(), until.isoformat())
+    else:
+        ssrn, ssrn_health = [], {"status": "disabled", "raw_rows": 0, "kept": 0}
+    if CFG.get("nber", {}).get("enabled", True):
+        nber, nber_health = fetch_nber(since.isoformat(), until.isoformat())
+    else:
+        nber, nber_health = [], {"status": "disabled", "program_ids": 0, "metadata_checked": 0, "kept": 0}
     pubs.sort(key=lambda p: (p["d"], p["j"]), reverse=True)
     data = {
         "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
@@ -358,10 +482,12 @@ def main():
         "themes": {k: {"n": v["name"], "d": v["description"], "c": v["color"]} for k, v in CFG["themes"].items()},
         "areas": list(CFG["areas"].keys()),
         "pubs": pubs,
+        "nber": nber,
         "ssrn": ssrn,
+        "source_health": {"nber": nber_health, "ssrn": ssrn_health},
     }
     OUT.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
-    print(f"Wrote {OUT.name}: {len(pubs)} articles, {len(ssrn)} SSRN papers")
+    print(f"Wrote {OUT.name}: {len(pubs)} articles, {len(nber)} NBER papers, {len(ssrn)} SSRN papers")
     return 0
 
 

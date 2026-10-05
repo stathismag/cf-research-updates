@@ -17,8 +17,8 @@
   force = true
 
 [build]
-  command = "python3 -m pip install --quiet pillow && python3 scripts/build_social_preview.py"
   publish = "."
+  ignore = 'git log -1 --pretty=%B $COMMIT_REF | grep -q "\[skip netlify\]" || git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- index.html data.json conferences.json jobs.json issues archive sitemap.xml robots.txt netlify.toml favicon.png linkedin-preview-v4.jpg'
 
 [[headers]]
   for = "/*.json"

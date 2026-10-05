@@ -36,7 +36,12 @@ jobs:
 
       - run: pip install requests beautifulsoup4
 
-      - name: Verify ISSNs
+      - name: Static syntax and config checks
+        run: |
+          python -m py_compile scripts/fetch_papers.py scripts/build_site.py scripts/send_digest.py scripts/validate_update.py
+          python -m json.tool scripts/config.json > /dev/null
+
+      - name: Verify upstream sources
         run: python scripts/fetch_papers.py --check
 
       - name: Fetch new papers
@@ -44,8 +49,27 @@ jobs:
         env:
           DAYS: ${{ inputs.days }}
 
+      - name: Validate fetched data
+        run: python scripts/validate_update.py
+
       - name: Build crawlable site and archive
         run: python scripts/build_site.py
+
+      - name: Validate generated site and digest
+        run: |
+          python scripts/validate_update.py --site
+          python scripts/send_digest.py --dry-run > /tmp/digest.txt
+          test -s /tmp/digest.txt
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          s=Path("index.html").read_text(encoding="utf-8")
+          m=re.search(r"<script>(.*?)</script>",s,re.S)
+          if not m:
+              raise SystemExit("No inline script found")
+          Path("/tmp/site.js").write_text(m.group(1),encoding="utf-8")
+          PY
+          node --check /tmp/site.js
 
       - name: Email the digest to subscribers
         if: github.event_name == 'schedule' || inputs.send_email == true
