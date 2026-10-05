@@ -9,6 +9,11 @@ on:
         description: "Optional: look back this many days instead of since the last run (e.g. 14)"
         required: false
         default: ""
+      send_email:
+        description: "Send the Buttondown newsletter on this manual run"
+        required: false
+        type: boolean
+        default: false
 
 concurrency:                 # never run two updates at once (they would overwrite each other)
   group: update-listings
@@ -43,6 +48,7 @@ jobs:
         run: python scripts/build_site.py
 
       - name: Email the digest to subscribers
+        if: github.event_name == 'schedule' || inputs.send_email == true
         run: python scripts/send_digest.py
         env:
           BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
