@@ -311,11 +311,11 @@ def fetch_ssrn(since, until):
     return kept, {"status": "ok", "raw_rows": raw_rows, "kept": len(kept)}
 
 
-def _fetch_text(url, label):
+def _fetch_text(url, label, params=None):
     last = None
     for attempt in range(4):
         try:
-            r = requests.get(url, headers=HTML_HEADERS, timeout=90)
+            r = requests.get(url, params=params, headers=HTML_HEADERS, timeout=90)
             if r.status_code == 200 and r.text.strip():
                 return r.text
             last = f"HTTP {r.status_code}"
@@ -327,10 +327,10 @@ def _fetch_text(url, label):
 
 def _nber_issue_overlaps(value, since_d, until_d):
     value = clean(value)
-    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%B %Y", "%b %Y"):
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y-%m", "%m/%Y", "%B %Y", "%b %Y"):
         try:
             d = dt.datetime.strptime(value, fmt).date()
-            if fmt in ("%B %Y", "%b %Y"):
+            if fmt in ("%Y-%m", "%m/%Y", "%B %Y", "%b %Y"):
                 if d.month == 12:
                     month_end = dt.date(d.year + 1, 1, 1) - dt.timedelta(days=1)
                 else:
@@ -374,7 +374,7 @@ def nber_candidates(since, until):
             continue
         issue = clean(r.get("issue_date"))
         # Track latest parsable issue month/date for freshness checks.
-        for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%B %Y", "%b %Y"):
+        for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y-%m", "%m/%Y", "%B %Y", "%b %Y"):
             try:
                 d = dt.datetime.strptime(issue, fmt).date()
                 latest_issue = d if latest_issue is None or d > latest_issue else latest_issue
@@ -495,15 +495,15 @@ def check():
 
     ssrn = CFG["ssrn"]
     base = "https://papers.ssrn.com/sol3/Jeljour_results.cfm"
-    html_text = _fetch_html(
+    html_text = _fetch_text(
         base,
+        "SSRN FEN",
         params={
             "Network": "yes", "form_name": "journalBrowse",
             "journal_id": str(ssrn.get("journal_id", 203)),
             "lim": "false", "orderBy": "ab_approval_date",
             "orderDir": "desc", "strSelectedOption": "6", "npage": "1",
         },
-        label="SSRN FEN",
     )
     soup = BeautifulSoup(html_text, "html.parser")
     ssrn_links = [

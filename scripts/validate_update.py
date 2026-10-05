@@ -57,8 +57,12 @@ def main():
     minimum=int((CFG.get("nber") or {}).get("min_program_ids",10))
     if nh.get("status")!="ok" or int(nh.get("program_ids",0))<minimum:
         fail(f"NBER source unhealthy: {nh}")
-    if int(nh.get("metadata_checked",0))<min(10,minimum):
-        fail(f"NBER metadata check too small: {nh}")
+    candidates=int(nh.get("candidates",0))
+    checked=int(nh.get("metadata_checked",0))
+    if candidates < 0 or checked < 0 or checked > candidates:
+        fail(f"NBER source counts inconsistent: {nh}")
+    if candidates > 0 and checked != candidates:
+        fail(f"NBER metadata did not resolve every current-window candidate: {nh}")
 
     if len(d["ssrn"])>int(CFG["ssrn"].get("max_items",200)): fail("SSRN cap exceeded")
     if len(d["nber"])>int(CFG["nber"].get("max_items",100)): fail("NBER cap exceeded")
