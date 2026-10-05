@@ -77,6 +77,19 @@ def tag(text):
     return themes, (best if hits[best] > 0 else "General")
 
 
+def date_from_parts(item, key):
+    parts = ((item.get(key) or {}).get("date-parts") or [])
+    if not parts or not parts[0]:
+        return None
+    y, *rest = parts[0]
+    m = rest[0] if len(rest) > 0 else 1
+    d = rest[1] if len(rest) > 1 else 1
+    try:
+        return dt.date(int(y), int(m), int(d)).isoformat()
+    except (TypeError, ValueError):
+        return None
+
+
 def parse(item, code):
     title = clean((item.get("title") or [""])[0])
     if not title or SKIP_TITLE.search(title):
@@ -90,8 +103,10 @@ def parse(item, code):
     if len(ab) > limit:
         ab = ab[:limit].rsplit(" ", 1)[0] + "…"
     themes, area = tag(title + " " + ab)
+    display_date = date_from_parts(item, "posted") if code == "SSRN" else None
+    display_date = display_date or (item.get("created") or {}).get("date-time", "")[:10]
     return {
-        "j": code, "t": title, "d": item["created"]["date-time"][:10],
+        "j": code, "t": title, "d": display_date,
         "a": area, "th": themes, "au": authors, "ab": ab,
         "url": item.get("URL") or f"https://doi.org/{item['DOI']}", "doi": item["DOI"].lower(),
     }
@@ -107,6 +122,31 @@ def works(issn, since, until, rows, max_pages):
         })
         if data is None:
             print(f"  WARNING: ISSN {issn} not found on Crossref - check config.json", flush=True)
+            return
+        msg = data["message"]
+        items = msg.get("items", [])
+        yield from items
+        cursor = msg.get("next-cursor")
+        if len(items) < rows or not cursor:
+            return
+
+
+def prefix_works(prefix, since, until, rows, max_pages):
+    """Retrieve newly registered Crossref works under a DOI prefix.
+
+    SSRN records are not reliably typed as journal-article, so querying the
+    SSRN Electronic Journal ISSN with type:journal-article can return zero.
+    SSRN DOIs use the 10.2139 prefix; query that prefix without a type filter.
+    """
+    cursor = "*"
+    for _ in range(max_pages):
+        data = get(f"{API}/prefixes/{prefix}/works", {
+            "filter": f"from-created-date:{since},until-created-date:{until}",
+            "rows": rows, "cursor": cursor,
+            "select": "DOI,title,author,abstract,created,posted,URL,type",
+        })
+        if data is None:
+            print(f"  WARNING: DOI prefix {prefix} not found on Crossref - check config.json", flush=True)
             return
         msg = data["message"]
         items = msg.get("items", [])
@@ -137,7 +177,7 @@ def fetch_journals(since, until):
 def fetch_ssrn(since, until):
     cfg = CFG["ssrn"]
     out, n_all = [], 0
-    for it in works(cfg["issn"], since, until, 1000, cfg.get("max_pages", 12)):
+    for it in prefix_works(cfg["prefix"], since, until, 1000, cfg.get("max_pages", 12)):
         n_all += 1
         p = parse(it, "SSRN")
         if p and SSRN_RX.search(p["t"].lower()):
@@ -170,11 +210,15 @@ def window(args):
 
 
 def check():
-    rows = list(CFG["journals"].items()) + [("SSRN", CFG["ssrn"])]
-    for code, j in rows:
+    for code, j in CFG["journals"].items():
         d = get(f"{API}/journals/{j['issn']}")
         name = d["message"]["title"] if d else "NOT FOUND - fix this ISSN"
         print(f"{code:5s} {j['issn']:10s} {name}")
+    ssrn = CFG["ssrn"]
+    d = get(f"{API}/prefixes/{ssrn['prefix']}")
+    msg = d.get("message", {}) if d else {}
+    name = msg.get("name") or msg.get("prefix") or ("FOUND" if d else "NOT FOUND - fix this prefix")
+    print(f"SSRN  {ssrn['prefix']:10s} {name} (DOI prefix)")
 
 
 def main():

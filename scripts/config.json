@@ -5,74 +5,386 @@
   "overlap_days": 2,
   "max_window_days": 45,
   "abstract_chars": 700,
-
   "journals": {
-    "JF":   {"name": "Journal of Finance",                            "issn": "1540-6261"},
-    "JFE":  {"name": "Journal of Financial Economics",                "issn": "0304-405X"},
-    "RFS":  {"name": "Review of Financial Studies",                   "issn": "1465-7368"},
-    "JFQA": {"name": "Journal of Financial and Quantitative Analysis", "issn": "0022-1090"},
-    "RoF":  {"name": "Review of Finance",                             "issn": "1572-3097"},
-    "RCFS": {"name": "Review of Corporate Finance Studies",           "issn": "2046-9128"},
-    "JCF":  {"name": "Journal of Corporate Finance",                  "issn": "0929-1199"},
-    "FM":   {"name": "Financial Management",                          "issn": "0046-3892"},
-    "JFI":  {"name": "Journal of Financial Intermediation",           "issn": "1042-9573"},
-    "JBF":  {"name": "Journal of Banking & Finance",                  "issn": "0378-4266"},
-    "EFM":  {"name": "European Financial Management",                 "issn": "1354-7798"},
-    "CGIR": {"name": "Corporate Governance: An International Review", "issn": "0964-8410"},
-    "JFM":  {"name": "Journal of Financial Markets",                  "issn": "1386-4181"},
-    "MS":   {"name": "Management Science",                            "issn": "0025-1909", "require_match": true}
+    "JF": {
+      "name": "Journal of Finance",
+      "issn": "1540-6261"
+    },
+    "JFE": {
+      "name": "Journal of Financial Economics",
+      "issn": "0304-405X"
+    },
+    "RFS": {
+      "name": "Review of Financial Studies",
+      "issn": "1465-7368"
+    },
+    "JFQA": {
+      "name": "Journal of Financial and Quantitative Analysis",
+      "issn": "0022-1090"
+    },
+    "RoF": {
+      "name": "Review of Finance",
+      "issn": "1572-3097"
+    },
+    "RCFS": {
+      "name": "Review of Corporate Finance Studies",
+      "issn": "2046-9128"
+    },
+    "JCF": {
+      "name": "Journal of Corporate Finance",
+      "issn": "0929-1199"
+    },
+    "FM": {
+      "name": "Financial Management",
+      "issn": "0046-3892"
+    },
+    "JFI": {
+      "name": "Journal of Financial Intermediation",
+      "issn": "1042-9573"
+    },
+    "JBF": {
+      "name": "Journal of Banking & Finance",
+      "issn": "0378-4266"
+    },
+    "EFM": {
+      "name": "European Financial Management",
+      "issn": "1354-7798"
+    },
+    "CGIR": {
+      "name": "Corporate Governance: An International Review",
+      "issn": "0964-8410"
+    },
+    "JFM": {
+      "name": "Journal of Financial Markets",
+      "issn": "1386-4181"
+    },
+    "MS": {
+      "name": "Management Science",
+      "issn": "0025-1909",
+      "require_match": true
+    }
   },
-
   "ssrn": {
     "enabled": true,
     "issn": "1556-5068",
     "max_pages": 12,
     "max_items": 200,
-    "keywords": ["firm*", "corporate", "company", "companies", "CEO*", "board*", "merger*", "acquisition*", "takeover*",
-      "IPO*", "dividend*", "payout*", "buyback*", "repurchase*", "leverage", "capital structure", "debt", "equity",
-      "investment*", "governance", "shareholder*", "bank*", "loan*", "bond*", "cash holding*", "financing", "venture capital",
-      "private equity", "credit", "lending", "cost of capital", "valuation"]
+    "keywords": [
+      "firm*",
+      "corporate",
+      "company",
+      "companies",
+      "CEO*",
+      "board*",
+      "merger*",
+      "acquisition*",
+      "takeover*",
+      "IPO*",
+      "dividend*",
+      "payout*",
+      "buyback*",
+      "repurchase*",
+      "leverage",
+      "capital structure",
+      "debt",
+      "equity",
+      "investment*",
+      "governance",
+      "shareholder*",
+      "bank*",
+      "loan*",
+      "bond*",
+      "cash holding*",
+      "financing",
+      "venture capital",
+      "private equity",
+      "credit",
+      "lending",
+      "cost of capital",
+      "valuation"
+    ],
+    "prefix": "10.2139"
   },
-
   "themes": {
-    "climate": {"name": "Climate Uncertainty", "description": "Policy, transition & physical climate risk", "color": "#d9534f",
-      "keywords": ["climate", "carbon", "emission*", "greenhouse", "global warming", "net zero", "net-zero", "decarboni*",
-        "extreme weather", "hurricane*", "flood*", "wildfire*", "drought*", "heat wave*", "heatwave*", "temperature",
-        "sea level", "transition risk", "physical risk", "green bond*", "weather risk"]},
-    "bio": {"name": "Biodiversity & Nature", "description": "Nature loss, deforestation, water", "color": "#2e8b57",
-      "keywords": ["biodiversity", "nature-related", "nature loss", "nature risk", "deforestation", "ecosystem*", "species",
-        "water scarcity", "water stress", "water risk", "natural capital", "TNFD", "habitat*", "land use", "pollinat*"]},
-    "cyber": {"name": "Cybersecurity", "description": "Breaches, ransomware, cyber governance", "color": "#5b4bd6",
-      "keywords": ["cyber*", "data breach*", "ransomware", "hacker*", "hacking", "information security", "IT security",
-        "privacy breach*", "malware", "phishing", "security breach*"]},
-    "crypto": {"name": "Crypto & Digital Assets", "description": "Tokenisation, stablecoins, DeFi", "color": "#e08e0b",
-      "keywords": ["crypto*", "bitcoin", "ethereum", "blockchain", "stablecoin*", "token*", "DeFi", "decentralized finance",
-        "decentralised finance", "digital asset*", "NFT*", "DAO*", "CBDC*", "digital currenc*", "smart contract*"]},
-    "geo": {"name": "Political Geography", "description": "Geopolitics, elections, sanctions, borders", "color": "#1f78b4",
-      "keywords": ["geopolitic*", "political risk", "political uncertainty", "policy uncertainty", "election*", "sanction*",
-        "war", "wars", "armed conflict", "trade war*", "border*", "nationalis*", "populis*", "sovereign risk", "partisan*",
-        "political connection*", "lobbying", "country risk", "territorial", "military", "invasion"]},
-    "ai": {"name": "AI & Technology", "description": "Generative AI, automation, intangibles", "color": "#b03a8a",
-      "keywords": ["artificial intelligence", "machine learning", "generative AI", "large language model*", "LLM*", "ChatGPT",
-        "automation", "robot*", "algorithm*", "digital transformation", "technology adoption", "fintech", "AI adoption"]},
-    "supply": {"name": "Supply Chains & Trade", "description": "Reshoring, tariffs, fragmentation", "color": "#6d5f4b",
-      "keywords": ["supply chain*", "supplier*", "reshoring", "onshoring", "offshoring", "friend-shoring", "friendshoring",
-        "nearshoring", "tariff*", "trade polic*", "imports", "importer*", "exports", "exporter*", "trade credit",
-        "globali*ation", "deglobali*ation", "fragmentation", "customer-supplier"]},
-    "esg": {"name": "ESG & Sustainability", "description": "Sustainable finance, CSR, stakeholders", "color": "#0e7c66",
-      "keywords": ["ESG", "sustainab*", "socially responsible", "CSR", "corporate social responsibility", "green",
-        "environmental, social", "impact investing", "responsible investing", "stakeholder*", "greenwashing"]}
+    "climate": {
+      "name": "Climate Uncertainty",
+      "description": "Policy, transition & physical climate risk",
+      "color": "#d9534f",
+      "keywords": [
+        "climate",
+        "carbon",
+        "emission*",
+        "greenhouse",
+        "global warming",
+        "net zero",
+        "net-zero",
+        "decarboni*",
+        "extreme weather",
+        "hurricane*",
+        "flood*",
+        "wildfire*",
+        "drought*",
+        "heat wave*",
+        "heatwave*",
+        "temperature",
+        "sea level",
+        "transition risk",
+        "physical risk",
+        "green bond*",
+        "weather risk"
+      ]
+    },
+    "bio": {
+      "name": "Biodiversity & Nature",
+      "description": "Nature loss, deforestation, water",
+      "color": "#2e8b57",
+      "keywords": [
+        "biodiversity",
+        "nature-related",
+        "nature loss",
+        "nature risk",
+        "deforestation",
+        "ecosystem*",
+        "species",
+        "water scarcity",
+        "water stress",
+        "water risk",
+        "natural capital",
+        "TNFD",
+        "habitat*",
+        "land use",
+        "pollinat*"
+      ]
+    },
+    "cyber": {
+      "name": "Cybersecurity",
+      "description": "Breaches, ransomware, cyber governance",
+      "color": "#5b4bd6",
+      "keywords": [
+        "cyber*",
+        "data breach*",
+        "ransomware",
+        "hacker*",
+        "hacking",
+        "information security",
+        "IT security",
+        "privacy breach*",
+        "malware",
+        "phishing",
+        "security breach*"
+      ]
+    },
+    "crypto": {
+      "name": "Crypto & Digital Assets",
+      "description": "Tokenisation, stablecoins, DeFi",
+      "color": "#e08e0b",
+      "keywords": [
+        "crypto*",
+        "bitcoin",
+        "ethereum",
+        "blockchain",
+        "stablecoin*",
+        "token*",
+        "DeFi",
+        "decentralized finance",
+        "decentralised finance",
+        "digital asset*",
+        "NFT*",
+        "DAO*",
+        "CBDC*",
+        "digital currenc*",
+        "smart contract*"
+      ]
+    },
+    "geo": {
+      "name": "Political Geography",
+      "description": "Geopolitics, elections, sanctions, borders",
+      "color": "#1f78b4",
+      "keywords": [
+        "geopolitic*",
+        "political risk",
+        "political uncertainty",
+        "policy uncertainty",
+        "election*",
+        "sanction*",
+        "war",
+        "wars",
+        "armed conflict",
+        "trade war*",
+        "border*",
+        "nationalis*",
+        "populis*",
+        "sovereign risk",
+        "partisan*",
+        "political connection*",
+        "lobbying",
+        "country risk",
+        "territorial",
+        "military",
+        "invasion"
+      ]
+    },
+    "ai": {
+      "name": "AI & Technology",
+      "description": "Generative AI, automation, intangibles",
+      "color": "#b03a8a",
+      "keywords": [
+        "artificial intelligence",
+        "machine learning",
+        "generative AI",
+        "large language model*",
+        "LLM*",
+        "ChatGPT",
+        "automation",
+        "robot*",
+        "algorithm*",
+        "digital transformation",
+        "technology adoption",
+        "fintech",
+        "AI adoption"
+      ]
+    },
+    "supply": {
+      "name": "Supply Chains & Trade",
+      "description": "Reshoring, tariffs, fragmentation",
+      "color": "#6d5f4b",
+      "keywords": [
+        "supply chain*",
+        "supplier*",
+        "reshoring",
+        "onshoring",
+        "offshoring",
+        "friend-shoring",
+        "friendshoring",
+        "nearshoring",
+        "tariff*",
+        "trade polic*",
+        "imports",
+        "importer*",
+        "exports",
+        "exporter*",
+        "trade credit",
+        "globali*ation",
+        "deglobali*ation",
+        "fragmentation",
+        "customer-supplier"
+      ]
+    },
+    "esg": {
+      "name": "ESG & Sustainability",
+      "description": "Sustainable finance, CSR, stakeholders",
+      "color": "#0e7c66",
+      "keywords": [
+        "ESG",
+        "sustainab*",
+        "socially responsible",
+        "CSR",
+        "corporate social responsibility",
+        "green",
+        "environmental, social",
+        "impact investing",
+        "responsible investing",
+        "stakeholder*",
+        "greenwashing"
+      ]
+    }
   },
-
   "areas": {
-    "Capital Structure": ["leverage", "capital structure", "debt", "bond*", "borrowing", "maturity", "covenant*", "credit rating*", "default risk"],
-    "Financing & IPOs": ["IPO*", "initial public offering*", "equity issuance", "seasoned equity", "SEO*", "venture capital", "private equity", "crowdfunding", "underpricing", "listing*", "going public", "financing", "fundraising"],
-    "Payout Policy": ["dividend*", "payout*", "buyback*", "repurchase*"],
-    "M&A": ["merger*", "acquisition*", "M&A", "takeover*", "divestiture*", "spin-off*", "spinoff*", "acquirer*", "target firm*"],
-    "Governance": ["governance", "board*", "CEO*", "executive compensation", "shareholder*", "activis*", "ownership", "director*", "incentive*", "agency", "proxy", "say on pay"],
-    "Investment": ["investment*", "capital expenditure*", "capex", "R&D", "innovation", "patent*", "intangible*", "real option*", "project*"],
-    "Cash & Liquidity": ["cash holding*", "liquidity", "working capital", "treasury", "cash flow*", "precautionary"],
-    "Banking & Credit": ["bank*", "loan*", "lender*", "credit", "syndicated", "lending", "borrower*"],
-    "Valuation": ["valuation", "cost of capital", "cost of equity", "firm value", "stock return*", "announcement return*", "Tobin*", "market reaction", "abnormal return*"]
+    "Capital Structure": [
+      "leverage",
+      "capital structure",
+      "debt",
+      "bond*",
+      "borrowing",
+      "maturity",
+      "covenant*",
+      "credit rating*",
+      "default risk"
+    ],
+    "Financing & IPOs": [
+      "IPO*",
+      "initial public offering*",
+      "equity issuance",
+      "seasoned equity",
+      "SEO*",
+      "venture capital",
+      "private equity",
+      "crowdfunding",
+      "underpricing",
+      "listing*",
+      "going public",
+      "financing",
+      "fundraising"
+    ],
+    "Payout Policy": [
+      "dividend*",
+      "payout*",
+      "buyback*",
+      "repurchase*"
+    ],
+    "M&A": [
+      "merger*",
+      "acquisition*",
+      "M&A",
+      "takeover*",
+      "divestiture*",
+      "spin-off*",
+      "spinoff*",
+      "acquirer*",
+      "target firm*"
+    ],
+    "Governance": [
+      "governance",
+      "board*",
+      "CEO*",
+      "executive compensation",
+      "shareholder*",
+      "activis*",
+      "ownership",
+      "director*",
+      "incentive*",
+      "agency",
+      "proxy",
+      "say on pay"
+    ],
+    "Investment": [
+      "investment*",
+      "capital expenditure*",
+      "capex",
+      "R&D",
+      "innovation",
+      "patent*",
+      "intangible*",
+      "real option*",
+      "project*"
+    ],
+    "Cash & Liquidity": [
+      "cash holding*",
+      "liquidity",
+      "working capital",
+      "treasury",
+      "cash flow*",
+      "precautionary"
+    ],
+    "Banking & Credit": [
+      "bank*",
+      "loan*",
+      "lender*",
+      "credit",
+      "syndicated",
+      "lending",
+      "borrower*"
+    ],
+    "Valuation": [
+      "valuation",
+      "cost of capital",
+      "cost of equity",
+      "firm value",
+      "stock return*",
+      "announcement return*",
+      "Tobin*",
+      "market reaction",
+      "abnormal return*"
+    ]
   }
 }
