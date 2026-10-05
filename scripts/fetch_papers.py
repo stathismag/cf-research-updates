@@ -136,12 +136,12 @@ def prefix_works(prefix, since, until, rows, max_pages):
 
     SSRN records are not reliably typed as journal-article, so querying the
     SSRN Electronic Journal ISSN with type:journal-article can return zero.
-    SSRN DOIs use the 10.2139 prefix; query that prefix without a type filter.
+    SSRN DOIs use the 10.2139 prefix; query posted-content by its posted date.
     """
     cursor = "*"
     for _ in range(max_pages):
         data = get(f"{API}/prefixes/{prefix}/works", {
-            "filter": f"from-created-date:{since},until-created-date:{until}",
+            "filter": f"from-posted-date:{since},until-posted-date:{until},type:posted-content",
             "rows": rows, "cursor": cursor,
             "select": "DOI,title,author,abstract,created,posted,URL,type",
         })
