@@ -17,15 +17,14 @@ import re
 import sys
 import time
 from pathlib import Path
-from urllib.parse import urljoin
 
 import requests
-from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[1]
 CFG = json.loads((ROOT / "scripts" / "config.json").read_text(encoding="utf-8"))
 OUT = ROOT / "data.json"
 API = "https://api.crossref.org"
+OPENALEX_API = "https://api.openalex.org"
 CONTACT = os.environ.get("CROSSREF_EMAIL") or CFG["contact_email"]  # secret in the Action, config.json locally
 HEADERS = {"User-Agent": f"cf-research-updates/1.0 (mailto:{CONTACT})"}
 HTML_HEADERS = {**HEADERS, "Accept": "text/html,application/xhtml+xml", "Accept-Language": "en-US,en;q=0.8"}
@@ -66,6 +65,37 @@ def get(url, params=None):
         time.sleep(5 * (attempt + 1))
     raise RuntimeError(f"Crossref request failed: {url} ({last})")
 
+
+
+def openalex_abstract(index):
+    """Reconstruct OpenAlex abstract text from its inverted index."""
+    if not index:
+        return ""
+    words = []
+    for token, positions in index.items():
+        for pos in positions or []:
+            words.append((pos, token))
+    words.sort()
+    return " ".join(token for _, token in words)
+
+
+def get_openalex(params):
+    last = None
+    query = dict(params or {})
+    if CONTACT and CONTACT != "you@example.com":
+        query.setdefault("mailto", CONTACT)
+    for attempt in range(5):
+        try:
+            r = requests.get(f"{OPENALEX_API}/works", params=query, headers=HEADERS, timeout=90)
+        except requests.RequestException as e:
+            last = e
+            time.sleep(4 * (attempt + 1))
+            continue
+        if r.status_code == 200:
+            return r.json()
+        last = f"HTTP {r.status_code}: {r.text[:200]}"
+        time.sleep(4 * (attempt + 1))
+    raise RuntimeError(f"OpenAlex SSRN request failed: {last}")
 
 def clean(s):
     s = re.sub(r"<[^>]+>", " ", s or "")
@@ -179,136 +209,113 @@ def fetch_journals(since, until):
     return out
 
 
-def _parse_ssrn_date(text):
-    m = re.search(r"\bPosted\s+(\d{1,2}\s+[A-Za-z]{3}\s+\d{4})\b", text or "", re.I)
-    if not m:
-        return None
-    try:
-        return dt.datetime.strptime(m.group(1), "%d %b %Y").date()
-    except ValueError:
-        return None
-
-
-def _ssrn_entry_container(link):
-    """Find the smallest useful result container around a title link."""
-    node = link
-    for _ in range(8):
-        node = getattr(node, "parent", None)
-        if node is None:
-            break
-        txt = node.get_text(" ", strip=True)
-        if "Posted " in txt and len(txt) < 12000:
-            return node
-    return link.parent
-
-
 def fetch_ssrn(since, until):
-    """Fetch recent finance preprints directly from SSRN's Financial Economics Network."""
+    """Fetch recent SSRN preprints from the OpenAlex SSRN repository."""
     cfg = CFG["ssrn"]
-    since_d, until_d = dt.date.fromisoformat(since), dt.date.fromisoformat(until)
-    base = "https://papers.ssrn.com/sol3/Jeljour_results.cfm"
     out, seen = [], set()
+    cursor = "*"
     raw_rows = 0
+    total_available = None
+    per_page = 200
+    max_pages = cfg.get("max_pages", 100)
 
-    for page in range(1, cfg.get("max_pages", 20) + 1):
-        params = {
-            "Network": "yes",
-            "form_name": "journalBrowse",
-            "journal_id": str(cfg.get("journal_id", 203)),
-            "lim": "false",
-            "orderBy": "ab_approval_date",
-            "orderDir": "desc",
-            "strSelectedOption": "6",
-            "npage": str(page),
-        }
-        try:
-            r = requests.get(base, params=params, headers=HEADERS, timeout=90)
-            r.raise_for_status()
-        except requests.RequestException as e:
-            raise RuntimeError(f"SSRN FEN request failed on page {page}: {e}") from e
+    for _ in range(max_pages):
+        data = get_openalex({
+            "filter": (
+                f"repository:{cfg['openalex_source_id']},"
+                f"type:preprint,"
+                f"from_publication_date:{since},to_publication_date:{until}"
+            ),
+            "per_page": per_page,
+            "cursor": cursor,
+            "select": (
+                "id,doi,display_name,publication_date,authorships,"
+                "abstract_inverted_index,locations,type"
+            ),
+        })
+        meta = data.get("meta") or {}
+        if total_available is None:
+            total_available = int(meta.get("count") or 0)
+            if total_available <= 0:
+                raise RuntimeError(
+                    "OpenAlex SSRN repository returned zero recent preprints; refusing to publish."
+                )
+            capacity = per_page * max_pages
+            if total_available > capacity:
+                raise RuntimeError(
+                    f"OpenAlex SSRN query has {total_available} records but capacity is {capacity}; "
+                    "increase max_pages rather than silently truncate."
+                )
 
-        soup = BeautifulSoup(r.text, "html.parser")
-        links = soup.select('a.title[href*="abstract="], a.title[href*="abstract_id="]')
-        if not links:
-            links = [
-                a for a in soup.find_all("a", href=True)
-                if re.search(r"(?:abstract=|abstract_id=)\d+", a.get("href", ""), re.I)
-                and a.get_text(" ", strip=True)
-            ]
-        if not links:
-            if page == 1:
-                raise RuntimeError("SSRN FEN returned no paper rows; refusing to publish an empty SSRN feed.")
-            break
-
-        page_dates = []
-        page_seen_ids = set()
-        for link in links:
-            href = link.get("href", "")
-            mid = re.search(r"(?:abstract=|abstract_id=)(\d+)", href, re.I)
-            if not mid:
-                continue
-            paper_id = mid.group(1)
-            if paper_id in page_seen_ids:
-                continue
-            page_seen_ids.add(paper_id)
-
-            container = _ssrn_entry_container(link)
-            text = container.get_text(" ", strip=True)
-            posted = _parse_ssrn_date(text)
-            if not posted:
-                continue
-            raw_rows += 1
-            page_dates.append(posted)
-
-            if posted < since_d or posted > until_d:
-                continue
-
-            title = clean(link.get_text(" ", strip=True))
+        items = data.get("results") or []
+        raw_rows += len(items)
+        for it in items:
+            title = clean(it.get("display_name", ""))
             if not title or SKIP_TITLE.search(title):
                 continue
-
-            if not SSRN_RX.search(title.lower()):
+            ab = clean(openalex_abstract(it.get("abstract_inverted_index")))
+            if not SSRN_RX.search(f"{title} {ab}".lower()):
                 continue
 
-            url = urljoin("https://papers.ssrn.com", href)
-            author_names = []
-            for a in container.find_all("a", href=True):
-                ah = a.get("href", "")
-                name = clean(a.get_text(" ", strip=True))
-                if name and ("AbsByAuth.cfm" in ah or "per_id=" in ah):
-                    author_names.append(name)
-            authors = ", ".join(dict.fromkeys(author_names)) or "—"
-
-            themes, area = tag(title)
-            doi = f"10.2139/ssrn.{paper_id}"
-            if paper_id in seen:
+            doi = (it.get("doi") or "").replace("https://doi.org/", "").lower()
+            url = ""
+            for loc in it.get("locations") or []:
+                src = loc.get("source") or {}
+                sid = (src.get("id") or "").rstrip("/").split("/")[-1]
+                if sid.lower() == cfg["openalex_source_id"].lower():
+                    url = loc.get("landing_page_url") or ""
+                    if url:
+                        break
+            url = url or (f"https://doi.org/{doi}" if doi else it.get("id", ""))
+            key = doi or url or title.lower()
+            if key in seen:
                 continue
-            seen.add(paper_id)
+            seen.add(key)
+
+            authors = ", ".join(
+                (a.get("author") or {}).get("display_name", "")
+                for a in it.get("authorships") or []
+                if (a.get("author") or {}).get("display_name")
+            ) or "—"
+
+            limit = CFG.get("abstract_chars", 700)
+            if len(ab) > limit:
+                ab = ab[:limit].rsplit(" ", 1)[0] + "…"
+            themes, area = tag(f"{title} {ab}")
             out.append({
                 "j": "SSRN",
                 "t": title,
-                "d": posted.isoformat(),
+                "d": it.get("publication_date") or "",
                 "a": area,
                 "th": themes,
                 "au": authors,
-                "ab": "",
+                "ab": ab,
                 "url": url,
                 "doi": doi,
             })
 
-        print(f"  SSRN FEN page {page:2d}: {len(page_dates):3d} dated rows", flush=True)
-
-        if page_dates and min(page_dates) < since_d:
+        cursor = meta.get("next_cursor")
+        if not items or not cursor or raw_rows >= total_available:
             break
-        time.sleep(1)
 
-    if raw_rows == 0:
-        raise RuntimeError("SSRN FEN produced zero dated rows; refusing to treat this as a valid empty result.")
+    if total_available is None or raw_rows != total_available:
+        raise RuntimeError(
+            f"OpenAlex SSRN pagination incomplete: fetched {raw_rows} of {total_available} records."
+        )
 
     out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
-    print(f"  SSRN  {len(out):3d} kept of {raw_rows} dated FEN rows", flush=True)
-    kept = out[: cfg.get("max_items", 200)]
-    return kept, {"status": "ok", "raw_rows": raw_rows, "kept": len(kept)}
+    kept = out[:cfg.get("max_items", 200)]
+    print(
+        f"  SSRN  {len(kept):3d} kept of {raw_rows} recent OpenAlex SSRN preprints",
+        flush=True,
+    )
+    return kept, {
+        "status": "ok",
+        "raw_rows": raw_rows,
+        "total_available": total_available,
+        "kept": len(kept),
+        "source": "OpenAlex repository",
+    }
 
 
 def _fetch_text(url, label, params=None):
@@ -494,27 +501,21 @@ def check():
         print(f"{code:5s} {j['issn']:10s} {name}")
 
     ssrn = CFG["ssrn"]
-    base = "https://papers.ssrn.com/sol3/Jeljour_results.cfm"
-    html_text = _fetch_text(
-        base,
-        "SSRN FEN",
-        params={
-            "Network": "yes", "form_name": "journalBrowse",
-            "journal_id": str(ssrn.get("journal_id", 203)),
-            "lim": "false", "orderBy": "ab_approval_date",
-            "orderDir": "desc", "strSelectedOption": "6", "npage": "1",
-        },
-    )
-    soup = BeautifulSoup(html_text, "html.parser")
-    ssrn_links = [
-        a for a in soup.find_all("a", href=True)
-        if re.search(r"(?:abstract=|abstract_id=)\d+", a.get("href", ""), re.I)
-    ]
-    if not ssrn_links:
-        raise RuntimeError("SSRN FEN preflight found no paper links")
-    print(f"SSRN  FEN preflight: {len(ssrn_links)} paper links")
-
     today = dt.date.today()
+    oa = get_openalex({
+        "filter": (
+            f"repository:{ssrn['openalex_source_id']},type:preprint,"
+            f"from_publication_date:{(today - dt.timedelta(days=31)).isoformat()},"
+            f"to_publication_date:{today.isoformat()}"
+        ),
+        "per_page": 1,
+        "select": "id,display_name,publication_date,type",
+    })
+    oa_count = int((oa.get("meta") or {}).get("count") or 0)
+    if oa_count <= 0:
+        raise RuntimeError("OpenAlex SSRN preflight returned zero recent preprints")
+    print(f"SSRN  OpenAlex repository preflight: {oa_count} recent preprints")
+
     candidates, total_cf, latest_issue = nber_candidates(
         (today - dt.timedelta(days=31)).isoformat(), today.isoformat()
     )
