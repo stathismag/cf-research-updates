@@ -309,7 +309,7 @@ function cov(){
   const js=Object.entries(D.journals).map(([k,v])=>`${esc(v)} (${k})`).join(", ");
   $("cov").innerHTML=`<p><b>Journals included:</b> ${js||"—"}. No guarantee of completeness.</p>
   <p style="margin-top:10px"><b>NBER:</b> working papers identified from the NBER's official weekly metadata as Corporate Finance (program code CF), with Crossref registration dates used for day-level update-window filtering.</p>
-  <p style="margin-top:10px"><b>SSRN:</b> recent papers from the public SSRN Financial Economics Network (FEN), filtered using corporate-finance keywords. Coverage is intentionally selective rather than exhaustive.</p>
+  <p style="margin-top:10px"><b>SSRN:</b> recent preprints indexed by OpenAlex with SSRN Electronic Journal present in the work's repository locations, filtered using corporate-finance keywords in titles and abstracts. Coverage is selective rather than exhaustive.</p>
   <p style="margin-top:10px"><b>Theme tagging:</b> each paper is matched against keyword dictionaries for ${Object.values(D.themes).map(t=>esc(t.n)).join(", ")||"—"}, and assigned one classic area (${D.areas.map(esc).join(", ")||"—"}).</p>
   <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community through the “Post a conference” and “Post a job” forms at the top and reviewed before they appear. Past events and expired deadlines drop off automatically.</p>
   <p style="margin-top:10px"><b>Last paper update:</b> ${esc(D.generated)||"never"}.</p>`;
