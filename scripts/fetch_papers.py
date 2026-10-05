@@ -186,103 +186,68 @@ def fetch_journals(since, until):
 
 
 def fetch_ssrn(since, until):
-    """Fetch recent SSRN preprints from the OpenAlex SSRN repository."""
+    """Fetch recent SSRN DOI registrations from Crossref prefix 10.2139."""
     cfg = CFG["ssrn"]
     out, seen = [], set()
     cursor = "*"
     raw_rows = 0
     total_available = None
-    per_page = 200
-    max_pages = cfg.get("max_pages", 100)
+    rows = 1000
+    max_pages = cfg.get("max_pages", 30)
 
     for _ in range(max_pages):
-        data = get_openalex({
-            "filter": (
-                f"repository:{cfg['openalex_source_id']},"
-                f"type:preprint,"
-                f"from_publication_date:{since},to_publication_date:{until}"
-            ),
-            "per_page": per_page,
+        data = get(f"{API}/prefixes/{cfg['prefix']}/works", {
+            "filter": f"from-created-date:{since},until-created-date:{until}",
+            "rows": rows,
             "cursor": cursor,
-            "select": (
-                "id,doi,display_name,publication_date,authorships,"
-                "abstract_inverted_index,locations,type"
-            ),
+            "select": "DOI,title,author,abstract,created,URL",
         })
-        meta = data.get("meta") or {}
+        if data is None:
+            raise RuntimeError(f"Crossref SSRN prefix {cfg['prefix']} was not found")
+
+        msg = data.get("message") or {}
         if total_available is None:
-            total_available = int(meta.get("count") or 0)
+            total_available = int(msg.get("total-results") or 0)
             if total_available <= 0:
                 raise RuntimeError(
-                    "OpenAlex SSRN repository returned zero recent preprints; refusing to publish."
+                    "Crossref SSRN prefix returned zero recent DOI registrations; refusing to publish."
                 )
-            capacity = per_page * max_pages
+            capacity = rows * max_pages
             if total_available > capacity:
                 raise RuntimeError(
-                    f"OpenAlex SSRN query has {total_available} records but capacity is {capacity}; "
+                    f"Crossref SSRN query has {total_available} records but capacity is {capacity}; "
                     "increase max_pages rather than silently truncate."
                 )
 
-        items = data.get("results") or []
+        items = msg.get("items") or []
         raw_rows += len(items)
         for it in items:
-            title = clean(it.get("display_name", ""))
-            if not title or SKIP_TITLE.search(title):
+            p = parse(it, "SSRN")
+            if not p:
                 continue
-            ab = clean(openalex_abstract(it.get("abstract_inverted_index")))
-            if not SSRN_RX.search(f"{title} {ab}".lower()):
+            text = f"{p.get('t','')} {p.get('ab','')}".lower()
+            if not SSRN_RX.search(text):
                 continue
-
-            doi = (it.get("doi") or "").replace("https://doi.org/", "").lower()
-            url = ""
-            for loc in it.get("locations") or []:
-                src = loc.get("source") or {}
-                sid = (src.get("id") or "").rstrip("/").split("/")[-1]
-                if sid.lower() == cfg["openalex_source_id"].lower():
-                    url = loc.get("landing_page_url") or ""
-                    if url:
-                        break
-            url = url or (f"https://doi.org/{doi}" if doi else it.get("id", ""))
-            key = doi or url or title.lower()
+            key = p.get("doi") or p.get("url") or p.get("t","").lower()
             if key in seen:
                 continue
             seen.add(key)
+            out.append(p)
 
-            authors = ", ".join(
-                (a.get("author") or {}).get("display_name", "")
-                for a in it.get("authorships") or []
-                if (a.get("author") or {}).get("display_name")
-            ) or "—"
-
-            limit = CFG.get("abstract_chars", 700)
-            if len(ab) > limit:
-                ab = ab[:limit].rsplit(" ", 1)[0] + "…"
-            themes, area = tag(f"{title} {ab}")
-            out.append({
-                "j": "SSRN",
-                "t": title,
-                "d": it.get("publication_date") or "",
-                "a": area,
-                "th": themes,
-                "au": authors,
-                "ab": ab,
-                "url": url,
-                "doi": doi,
-            })
-
-        cursor = meta.get("next_cursor")
+        cursor = msg.get("next-cursor")
         if not items or not cursor or raw_rows >= total_available:
             break
 
     if total_available is None or raw_rows < total_available:
         raise RuntimeError(
-            f"OpenAlex SSRN pagination incomplete: fetched {raw_rows} of at least {total_available} records."
+            f"Crossref SSRN pagination incomplete: fetched {raw_rows} of {total_available} records."
         )
 
     out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
-    kept = out[:cfg.get("max_items", 200)]
+    kept = out[:cfg.get("max_items", 300)]
     print(
-        f"  SSRN  {len(kept):3d} kept of {raw_rows} recent OpenAlex SSRN preprints",
+        f"  SSRN  {len(kept):3d} kept of {raw_rows} recent DOI registrations "
+        f"({len(out)} corporate-finance keyword matches)",
         flush=True,
     )
     return kept, {
@@ -290,8 +255,9 @@ def fetch_ssrn(since, until):
         "raw_rows": raw_rows,
         "total_available": total_available,
         "complete": raw_rows >= total_available,
+        "keyword_matches": len(out),
         "kept": len(kept),
-        "source": "OpenAlex repository",
+        "source": f"Crossref DOI prefix {cfg['prefix']}",
     }
 
 
@@ -484,20 +450,11 @@ def check():
         print(f"{code:5s} {j['issn']:10s} {name}")
 
     ssrn = CFG["ssrn"]
-    today = dt.date.today()
-    oa = get_openalex({
-        "filter": (
-            f"repository:{ssrn['openalex_source_id']},type:preprint,"
-            f"from_publication_date:{(today - dt.timedelta(days=31)).isoformat()},"
-            f"to_publication_date:{today.isoformat()}"
-        ),
-        "per_page": 1,
-        "select": "id,display_name,publication_date,type",
-    })
-    oa_count = int((oa.get("meta") or {}).get("count") or 0)
-    if oa_count <= 0:
-        raise RuntimeError("OpenAlex SSRN preflight returned zero recent preprints")
-    print(f"SSRN  OpenAlex repository preflight: {oa_count} recent preprints")
+    d = get(f"{API}/prefixes/{ssrn['prefix']}")
+    if not d or not d.get("message"):
+        raise RuntimeError(f"Crossref SSRN prefix {ssrn['prefix']} not found")
+    owner = (d.get("message") or {}).get("name") or "registered prefix"
+    print(f"SSRN  Crossref prefix {ssrn['prefix']}: {owner}")
 
     candidates, total_cf, latest_issue = nber_candidates(
         (today - dt.timedelta(days=31)).isoformat(), today.isoformat()

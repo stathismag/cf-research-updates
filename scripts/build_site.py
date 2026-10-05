@@ -43,7 +43,7 @@ def render_coverage(d):
     areas=", ".join(esc(a) for a in d.get("areas",[])) or "—"
     return f"""<p><b>Journals included:</b> {journals}. No guarantee of completeness.</p>
 <p style="margin-top:10px"><b>NBER:</b> working papers identified from official NBER weekly metadata as Corporate Finance (program code CF), with Crossref registration dates used for day-level update-window filtering.</p>
-<p style="margin-top:10px"><b>SSRN:</b> recent preprints indexed by OpenAlex with SSRN Electronic Journal present in the work&apos;s repository locations, filtered using corporate-finance keywords in titles and abstracts. Coverage is selective rather than exhaustive.</p>
+<p style="margin-top:10px"><b>SSRN:</b> recent DOI registrations under the SSRN DOI prefix (10.2139) in Crossref, filtered using corporate-finance keywords in titles and available abstracts. Coverage is approximate.</p>
 <p style="margin-top:10px"><b>Theme tagging:</b> each paper is matched against keyword dictionaries for {themes}, and assigned one classic area ({areas}).</p>
 <p style="margin-top:10px"><b>Conferences &amp; jobs:</b> submitted by the community and reviewed before publication.</p>
 <p style="margin-top:10px"><b>Last paper update:</b> {esc(d.get("generated") or "never")}.</p>"""
