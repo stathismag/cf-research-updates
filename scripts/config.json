@@ -66,9 +66,10 @@
   },
   "ssrn": {
     "enabled": true,
-    "issn": "1556-5068",
-    "max_pages": 60,
-    "max_items": 300,
+    "source": "ssrn_fen_html",
+    "journal_id": 203,
+    "max_pages": 20,
+    "max_items": 200,
     "keywords": [
       "firm*",
       "corporate",
@@ -102,10 +103,7 @@
       "lending",
       "cost of capital",
       "valuation"
-    ],
-    "prefix": "10.2139",
-    "source": "openalex",
-    "openalex_source_id": "S4210172589"
+    ]
   },
   "themes": {
     "climate": {
