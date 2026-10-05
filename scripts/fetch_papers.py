@@ -22,6 +22,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CFG = json.loads((ROOT / "scripts" / "config.json").read_text(encoding="utf-8"))
 OUT = ROOT / "data.json"
 API = "https://api.crossref.org"
+OPENALEX_API = "https://api.openalex.org"
 CONTACT = os.environ.get("CROSSREF_EMAIL") or CFG["contact_email"]  # secret in the Action, config.json locally
 HEADERS = {"User-Agent": f"cf-research-updates/1.0 (mailto:{CONTACT})"}
 SKIP_TITLE = re.compile(
@@ -60,6 +61,34 @@ def get(url, params=None):
         last = f"HTTP {r.status_code}"
         time.sleep(5 * (attempt + 1))
     raise RuntimeError(f"Crossref request failed: {url} ({last})")
+
+
+def openalex_abstract(index):
+    """Reconstruct an OpenAlex abstract from its inverted index."""
+    if not index:
+        return ""
+    words = []
+    for token, positions in index.items():
+        for pos in positions or []:
+            words.append((pos, token))
+    words.sort()
+    return " ".join(token for _, token in words)
+
+
+def get_openalex(params):
+    last = None
+    for attempt in range(5):
+        try:
+            r = requests.get(f"{OPENALEX_API}/works", params=params, headers=HEADERS, timeout=90)
+        except requests.RequestException as e:
+            last = e
+            time.sleep(5 * (attempt + 1))
+            continue
+        if r.status_code == 200:
+            return r.json()
+        last = f"HTTP {r.status_code}: {r.text[:200]}"
+        time.sleep(5 * (attempt + 1))
+    raise RuntimeError(f"OpenAlex request failed ({last})")
 
 
 def clean(s):
@@ -175,17 +204,71 @@ def fetch_journals(since, until):
 
 
 def fetch_ssrn(since, until):
+    """Fetch recent SSRN papers from OpenAlex and keep corporate-finance matches."""
     cfg = CFG["ssrn"]
-    out, n_all = [], 0
-    for it in prefix_works(cfg["prefix"], since, until, 1000, cfg.get("max_pages", 12)):
-        n_all += 1
-        p = parse(it, "SSRN")
-        if p and SSRN_RX.search(p["t"].lower()):
-            out.append(p)
-    print(f"  SSRN  {len(out):3d} kept of {n_all} new DOIs", flush=True)
-    out.sort(key=lambda p: p["d"], reverse=True)
-    return out[: cfg.get("max_items", 200)]
+    out, seen, n_all = [], set(), 0
+    cursor = "*"
+    for _ in range(cfg.get("max_pages", 60)):
+        data = get_openalex({
+            "filter": (
+                f"primary_location.source.id:{cfg['openalex_source_id']},"
+                f"from_publication_date:{since},to_publication_date:{until}"
+            ),
+            "per-page": 200,
+            "cursor": cursor,
+            "select": (
+                "id,doi,display_name,publication_date,authorships,"
+                "abstract_inverted_index,primary_location"
+            ),
+        })
+        items = data.get("results", [])
+        n_all += len(items)
+        for it in items:
+            title = clean(it.get("display_name", ""))
+            if not title or SKIP_TITLE.search(title):
+                continue
+            ab = clean(openalex_abstract(it.get("abstract_inverted_index")))
+            haystack = f"{title} {ab}".lower()
+            if not SSRN_RX.search(haystack):
+                continue
 
+            doi = (it.get("doi") or "").replace("https://doi.org/", "").lower()
+            primary = it.get("primary_location") or {}
+            landing = primary.get("landing_page_url") or ""
+            url = landing or (f"https://doi.org/{doi}" if doi else it.get("id", ""))
+            key = doi or url or title.lower()
+            if key in seen:
+                continue
+            seen.add(key)
+
+            authors = ", ".join(
+                (a.get("author") or {}).get("display_name", "")
+                for a in it.get("authorships", [])
+                if (a.get("author") or {}).get("display_name")
+            ) or "—"
+            limit = CFG.get("abstract_chars", 700)
+            if len(ab) > limit:
+                ab = ab[:limit].rsplit(" ", 1)[0] + "…"
+            themes, area = tag(f"{title} {ab}")
+            out.append({
+                "j": "SSRN",
+                "t": title,
+                "d": it.get("publication_date") or "",
+                "a": area,
+                "th": themes,
+                "au": authors,
+                "ab": ab,
+                "url": url,
+                "doi": doi,
+            })
+
+        cursor = (data.get("meta") or {}).get("next_cursor")
+        if not items or not cursor:
+            break
+
+    out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
+    print(f"  SSRN  {len(out):3d} kept of {n_all} recent OpenAlex records", flush=True)
+    return out[: cfg.get("max_items", 300)]
 
 def window(args):
     today = dt.date.today()
@@ -215,10 +298,7 @@ def check():
         name = d["message"]["title"] if d else "NOT FOUND - fix this ISSN"
         print(f"{code:5s} {j['issn']:10s} {name}")
     ssrn = CFG["ssrn"]
-    d = get(f"{API}/prefixes/{ssrn['prefix']}")
-    msg = d.get("message", {}) if d else {}
-    name = msg.get("name") or msg.get("prefix") or ("FOUND" if d else "NOT FOUND - fix this prefix")
-    print(f"SSRN  {ssrn['prefix']:10s} {name} (DOI prefix)")
+    print(f"SSRN  {ssrn['openalex_source_id']:10s} OpenAlex SSRN Electronic Journal source")
 
 
 def main():
