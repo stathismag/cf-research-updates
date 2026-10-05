@@ -34,7 +34,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - run: pip install requests
+      - run: pip install requests beautifulsoup4
 
       - name: Verify ISSNs
         run: python scripts/fetch_papers.py --check
