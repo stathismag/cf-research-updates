@@ -37,12 +37,14 @@ def main():
     except Exception: fail("invalid window")
     if start>end: fail("window start after end")
 
+    grace=dt.timedelta(days=int((CFG.get("nber") or {}).get("catchup_days",21)))
     for key in ("pubs","nber","ssrn"):
         rows=d.get(key)
         if not isinstance(rows,list): fail(f"{key} is not a list")
+        lo=start-grace if key=="nber" else start
         seen=set()
         for p in rows:
-            validate_paper(p,key,start,end)
+            validate_paper(p,key,lo,end)
             ident=p.get("doi") or p.get("url")
             if ident in seen: fail(f"{key}: duplicate {ident}")
             seen.add(ident)
@@ -57,19 +59,23 @@ def main():
     expected_ssrn_source=f"Crossref DOI prefix {CFG['ssrn']['prefix']}"
     if sh.get("source")!=expected_ssrn_source:
         fail(f"Unexpected SSRN source: {sh}; expected {expected_ssrn_source}")
-    if not sh.get("complete") or int(sh.get("raw_rows",0)) < int(sh.get("total_available",-1)):
+    if sh.get("complete") is not True:
         fail(f"SSRN pagination incomplete: {sh}")
+    if int(sh.get("dropped_by_cap",0))>0:
+        print(f"WARNING: SSRN cap dropped {sh['dropped_by_cap']} of {sh.get('keyword_matches')} matches", file=sys.stderr)
     if int(sh.get("kept",-1)) != len(d["ssrn"]):
         fail(f"SSRN health/data count mismatch: {sh} vs {len(d['ssrn'])}")
-    minimum=int((CFG.get("nber") or {}).get("min_program_ids",10))
-    if nh.get("status")!="ok" or int(nh.get("program_ids",0))<minimum:
+    if nh.get("status") not in {"ok","degraded"}:
         fail(f"NBER source unhealthy: {nh}")
     candidates=int(nh.get("candidates",0))
     checked=int(nh.get("metadata_checked",0))
-    if candidates < 0 or checked < 0 or checked > candidates:
+    unresolved=int(nh.get("unresolved",0))
+    if candidates < 0 or checked < 0 or unresolved < 0 or checked + unresolved != candidates:
         fail(f"NBER source counts inconsistent: {nh}")
-    if candidates > 0 and checked != candidates:
-        fail(f"NBER metadata did not resolve every current-window candidate: {nh}")
+    if nh.get("status")=="degraded":
+        print(f"WARNING: NBER source degraded but journal/SSRN update remains valid: {nh}", file=sys.stderr)
+    if int(nh.get("kept",-1)) != len(d["nber"]):
+        fail(f"NBER health/data count mismatch: {nh} vs {len(d['nber'])}")
 
     if len(d["ssrn"])>int(CFG["ssrn"].get("max_items",200)): fail("SSRN cap exceeded")
     if len(d["nber"])>int(CFG["nber"].get("max_items",100)): fail("NBER cap exceeded")

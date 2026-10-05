@@ -84,7 +84,8 @@ def main():
     args = ap.parse_args()
 
     data = json.loads(DATA.read_text(encoding="utf-8"))
-    sent = set(json.loads(SENT.read_text(encoding="utf-8"))) if SENT.exists() else set()
+    sent_list = json.loads(SENT.read_text(encoding="utf-8")) if SENT.exists() else []
+    sent = set(sent_list)
     pubs = [p for p in data.get("pubs", []) if p.get("url") and p["url"] not in sent]
     nber = [p for p in data.get("nber", []) if p.get("url") and p["url"] not in sent]
     ssrn = [p for p in data.get("ssrn", []) if p.get("url") and p["url"] not in sent]
@@ -111,7 +112,9 @@ def main():
     if r.status_code >= 300:
         print(f"Buttondown rejected the email: HTTP {r.status_code}\n{r.text[:800]}", file=sys.stderr)
         return 1
-    SENT.write_text(json.dumps(sorted(sent | {p["url"] for p in papers})[-SENT_CAP:], indent=0), encoding="utf-8")
+    new_urls = [p["url"] for p in papers if p["url"] not in sent]
+    merged = sent_list + new_urls
+    SENT.write_text(json.dumps(merged[-SENT_CAP:], indent=0), encoding="utf-8")
     print(f"{'Drafted' if args.draft else 'Sent'} '{subject}' with {len(papers)} papers.")
     return 0
 

@@ -1,0 +1,160 @@
+{
+  "program_code": "CF",
+  "source": "NBER Corporate Finance program page",
+  "source_url": "https://www.nber.org/programs-projects/programs-working-groups/corporate-finance",
+  "refreshed": "2026-10-05",
+  "coverage_through": "2026-09",
+  "note": "Versioned fallback/cache because data.nber.org returns HTTP 403 to GitHub-hosted runners. Refresh before re-enabling the schedule.",
+  "papers": [
+    {
+      "wp": "w35775",
+      "issue_month": "2026-09",
+      "title": "When Tax Shields Shrink: Interest Deductibility Limitations and Corporate Innovation",
+      "authors": "Xinru Chen, Mara Faccio, Stefano Manfredonia & Jin Xu"
+    },
+    {
+      "wp": "w35778",
+      "issue_month": "2026-09",
+      "title": "Governing Global Externalities: Investor Voice Amid Fragmented Policy",
+      "authors": "Robin Döttling, Doron Levit, Nadya Malenko & Magdalena Rola-Janicka"
+    },
+    {
+      "wp": "w35780",
+      "issue_month": "2026-09",
+      "title": "Regulating Entrepreneurship: The Case of Capital Requirements",
+      "authors": "Annika Bacher, Andreas Fagereng, Marius A. K. Ring & Ella Getz Wold"
+    },
+    {
+      "wp": "w35732",
+      "issue_month": "2026-09",
+      "title": "Social Capital and Innovation: Evidence from Facebook Friendship Networks",
+      "authors": "Brad Cannon, David Hirshleifer & Joshua Thornton"
+    },
+    {
+      "wp": "w35756",
+      "issue_month": "2026-09",
+      "title": "Do Social Norms Substitute for Enforcement? Evidence from Public Officials’ Home Purchases in Singapore",
+      "authors": "Tomasz Piskorski, Amit Seru, Jian Zhang & Chun Zhao"
+    },
+    {
+      "wp": "w35707",
+      "issue_month": "2026-09",
+      "title": "Dynamic Investment and Product Market Rivalry: the Network Q Model",
+      "authors": "M. Cecilia Bustamante & Bruno Pellegrino"
+    },
+    {
+      "wp": "w35711",
+      "issue_month": "2026-09",
+      "title": "The Impact of Patient Capital",
+      "authors": "Yingxiang Li, Tong Liu & Ting Xu"
+    },
+    {
+      "wp": "w35696",
+      "issue_month": "2026-09",
+      "title": "Loan Rates as Incentive Instruments",
+      "authors": "Kinda Cheryl Hachem"
+    },
+    {
+      "wp": "w35703",
+      "issue_month": "2026-09",
+      "title": "How Big is Small? The Economic Effects of Access to Small Business Government Support",
+      "authors": "J. David Brown, Matthew Denes, Ran Duchin & John Hackney"
+    },
+    {
+      "wp": "w35684",
+      "issue_month": "2026-08",
+      "title": "Canaries in the Gold Mine: Early Productivity Gains from Artificial Intelligence Creating Organization Capital",
+      "authors": "Tania Babina, Alex X. He & Renhao Jiang"
+    },
+    {
+      "wp": "w35678",
+      "issue_month": "2026-08",
+      "title": "Smart Contracting in Network Markets",
+      "authors": "Darrell Duffie & Chaojun Wang"
+    },
+    {
+      "wp": "w35665",
+      "issue_month": "2026-08",
+      "title": "Democratizing Private Markets: Equilibrium Predictions",
+      "authors": "Lubos Pastor, Robert F. Stambaugh & Lucian A. Taylor"
+    },
+    {
+      "wp": "w35638",
+      "issue_month": "2026-08",
+      "title": "Tracing the Impact of Payment Convenience on Deposits: Evidence from Depositor Activeness",
+      "authors": "Xu Lu, Yang Song & Yao Zeng"
+    },
+    {
+      "wp": "w35641",
+      "issue_month": "2026-08",
+      "title": "Benchmark Mineability and the Financing of AI Innovation",
+      "authors": "Alex Chan"
+    },
+    {
+      "wp": "w35655",
+      "issue_month": "2026-08",
+      "title": "Crypto Capture of Foreign Aid",
+      "authors": "Sumit Agarwal, Peiyi Jin, Eswar S. Prasad & Daniel Rabetti"
+    },
+    {
+      "wp": "w35617",
+      "issue_month": "2026-08",
+      "title": "The Cov-lite Liquidity Advantage, Regulatory Pressures, and the Evolution of the Leveraged Loan Market",
+      "authors": "Robert Prilmeier & René M. Stulz"
+    },
+    {
+      "wp": "w35605",
+      "issue_month": "2026-08",
+      "title": "Search and Negotiation with Biased Beliefs in Consumer Credit Markets",
+      "authors": "Erik Berwart, Sean K. Higgins, Sheisha Kulkarni & Santiago Truffa"
+    },
+    {
+      "wp": "w35607",
+      "issue_month": "2026-08",
+      "title": "Credit Card Banking",
+      "authors": "Itamar Drechsler, Hyeyoon Jung, Weiyu Peng, Dominik Supera & Guanyu Zhou"
+    },
+    {
+      "wp": "w35593",
+      "issue_month": "2026-08",
+      "title": "More Frequent Than You Think: Revisiting Capital Structure Adjustment",
+      "authors": "Zhiguo He, Peter M. DeMarzo & Qiping Xu"
+    },
+    {
+      "wp": "w35578",
+      "issue_month": "2026-08",
+      "title": "Reconstructing a Century of U.S. Corporate Bonds: Credit Risk in Historical Perspective",
+      "authors": "Mohammad Ghaderi, Sébastien Plante, Nikolai Roussanov & Sang Byung Seo"
+    },
+    {
+      "wp": "w35579",
+      "issue_month": "2026-08",
+      "title": "Common Risk Factors in the Returns on Stocks, Bonds (and Options), Redux",
+      "authors": "Zhongtian Chen, Nikolai Roussanov, Xiaoliang Wang & Dongchen Zou"
+    },
+    {
+      "wp": "w35577",
+      "issue_month": "2026-08",
+      "title": "The Value Gap: Europe Cannot Scale",
+      "authors": "Bo Becker, Efraim Benmelech & Joao Monteiro"
+    },
+    {
+      "wp": "w35557",
+      "issue_month": "2026-08",
+      "title": "Demand for Safety in the Crypto Ecosystem",
+      "authors": "Murillo Campello, Angela Gallo, Lira Mota & Tammaro Terracciano"
+    },
+    {
+      "wp": "w35562",
+      "issue_month": "2026-08",
+      "title": "Monetary Policy in Mandarin Capitalism",
+      "authors": "Jeffery (Jinfan) Chang & Wei Xiong"
+    },
+    {
+      "wp": "w35565",
+      "issue_month": "2026-08",
+      "title": "Common Ownership and Collusion",
+      "authors": "Vincent Abraham, Florian Ederer & Catarina Marvao"
+    }
+  ]
+}

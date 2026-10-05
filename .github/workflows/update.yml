@@ -1,9 +1,8 @@
 name: Update research listings
 
 on:
-  schedule:
-    - cron: "0 6 1,15 * *"   # 06:00 UTC on the 1st and 15th of every month
-  workflow_dispatch:         # also lets you run it by hand from the Actions tab
+  # Schedule paused until a full manual validation run has passed.
+  workflow_dispatch:
     inputs:
       days:
         description: "Optional: look back this many days instead of since the last run (e.g. 14)"
@@ -85,23 +84,35 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      - name: Commit generated files if publishing
+        if: inputs.publish == true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json index.html issues archive sitemap.xml robots.txt
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update listings $(date -u +%Y-%m-%d)"
+            git pull --rebase origin main
+            git push
+          fi
+
       - name: Email the digest to subscribers
-        if: github.event_name == 'schedule' || inputs.send_email == true
+        if: inputs.send_email == true && inputs.publish == true
         run: python scripts/send_digest.py
         env:
           BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
           SITE_URL: https://corporatefinanceupdates.com
 
-      - name: Commit generated files if publishing
-        if: github.event_name == 'schedule' || inputs.publish == true
+      - name: Record emailed papers
+        if: inputs.send_email == true && inputs.publish == true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.json sent.json index.html issues archive sitemap.xml robots.txt
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "Update listings $(date -u +%Y-%m-%d)"
+          git add sent.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record emailed papers $(date -u +%Y-%m-%d) [skip netlify]"
             git pull --rebase origin main
             git push
           fi

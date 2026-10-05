@@ -67,44 +67,9 @@
   "ssrn": {
     "enabled": true,
     "source": "crossref_prefix",
-    "openalex_source_id": "S4210172589",
-    "max_pages": 30,
-    "max_items": 300,
-    "keywords": [
-      "firm*",
-      "corporate",
-      "company",
-      "companies",
-      "CEO*",
-      "board*",
-      "merger*",
-      "acquisition*",
-      "takeover*",
-      "IPO*",
-      "dividend*",
-      "payout*",
-      "buyback*",
-      "repurchase*",
-      "leverage",
-      "capital structure",
-      "debt",
-      "equity",
-      "investment*",
-      "governance",
-      "shareholder*",
-      "bank*",
-      "loan*",
-      "bond*",
-      "cash holding*",
-      "financing",
-      "venture capital",
-      "private equity",
-      "credit",
-      "lending",
-      "cost of capital",
-      "valuation"
-    ],
-    "prefix": "10.2139"
+    "prefix": "10.2139",
+    "max_pages": 60,
+    "max_items": 300
   },
   "themes": {
     "climate": {
@@ -390,9 +355,10 @@
   },
   "nber": {
     "enabled": true,
-    "metadata_base": "https://data.nber.org/nber_paper_chapter_metadata/tsv",
+    "cache_path": "cache/nber_cf_program.json",
     "program_code": "CF",
-    "min_program_ids": 100,
+    "catchup_days": 21,
+    "cache_warn_days": 45,
     "max_items": 100
   }
 }

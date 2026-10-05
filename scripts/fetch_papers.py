@@ -7,10 +7,8 @@ Fetch new corporate-finance research from Crossref and write data.json.
   python scripts/fetch_papers.py --days 30  override the look-back window
 """
 import argparse
-import csv
 import datetime as dt
 import html
-import io
 import json
 import os
 import re
@@ -24,14 +22,16 @@ ROOT = Path(__file__).resolve().parents[1]
 CFG = json.loads((ROOT / "scripts" / "config.json").read_text(encoding="utf-8"))
 OUT = ROOT / "data.json"
 API = "https://api.crossref.org"
-OPENALEX_API = "https://api.openalex.org"
 CONTACT = os.environ.get("CROSSREF_EMAIL") or CFG["contact_email"]  # secret in the Action, config.json locally
 HEADERS = {"User-Agent": f"cf-research-updates/1.0 (mailto:{CONTACT})"}
-HTML_HEADERS = {**HEADERS, "Accept": "text/html,application/xhtml+xml", "Accept-Language": "en-US,en;q=0.8"}
 SKIP_TITLE = re.compile(
     r"^(issue information|editorial board|front matter|back matter|erratum|corrigendum|retraction|"
     r"announcement|masthead|table of contents|index to volume|title page|editor'?s? (note|introduction)|"
-    r"call for papers|list of reviewers|acknowledg)", re.I)
+    r"call for papers|list of reviewers|acknowledg|american finance association$)", re.I)
+SKIP_TITLE_ANY = re.compile(r"\b(corrigendum|erratum|retraction)\b", re.I)
+_HTML_TAG = re.compile(r"</?(?:br|p|a|i|b|u|em|strong|sub|sup|span|div)\b[^>]*>", re.I)
+_NBER_NOTE = re.compile(r"Institutional subscribers to the NBER working paper series.*$", re.I | re.S)
+NBER_CACHE = ROOT / "cache" / "nber_cf_program.json"
 
 
 def rx(words):
@@ -45,7 +45,6 @@ def rx(words):
 
 THEME_RX = {k: rx(v["keywords"]) for k, v in CFG["themes"].items()}
 AREA_RX = {k: rx(v) for k, v in CFG["areas"].items()}
-SSRN_RX = rx(CFG["ssrn"]["keywords"])
 SSRN_CONTEXT_RX = rx(["firm*", "corporate", "company", "companies", "CEO*", "board*", "shareholder*"])
 
 
@@ -68,39 +67,11 @@ def get(url, params=None):
 
 
 
-def openalex_abstract(index):
-    """Reconstruct OpenAlex abstract text from its inverted index."""
-    if not index:
-        return ""
-    words = []
-    for token, positions in index.items():
-        for pos in positions or []:
-            words.append((pos, token))
-    words.sort()
-    return " ".join(token for _, token in words)
-
-
-def get_openalex(params):
-    last = None
-    query = dict(params or {})
-    if CONTACT and CONTACT != "you@example.com":
-        query.setdefault("mailto", CONTACT)
-    for attempt in range(5):
-        try:
-            r = requests.get(f"{OPENALEX_API}/works", params=query, headers=HEADERS, timeout=90)
-        except requests.RequestException as e:
-            last = e
-            time.sleep(4 * (attempt + 1))
-            continue
-        if r.status_code == 200:
-            return r.json()
-        last = f"HTTP {r.status_code}: {r.text[:200]}"
-        time.sleep(4 * (attempt + 1))
-    raise RuntimeError(f"OpenAlex SSRN request failed: {last}")
-
 def clean(s):
     s = re.sub(r"<[^>]+>", " ", s or "")
-    s = html.unescape(s)
+    s = html.unescape(html.unescape(s))
+    s = _HTML_TAG.sub(" ", s)
+    s = _NBER_NOTE.sub("", s)
     s = re.sub(r"^\s*abstract\s*[:.]?\s*", "", s, flags=re.I)
     return re.sub(r"\s+", " ", s).strip()
 
@@ -113,22 +84,9 @@ def tag(text):
     return themes, (best if hits[best] > 0 else "General")
 
 
-def date_from_parts(item, key):
-    parts = ((item.get(key) or {}).get("date-parts") or [])
-    if not parts or not parts[0]:
-        return None
-    y, *rest = parts[0]
-    m = rest[0] if len(rest) > 0 else 1
-    d = rest[1] if len(rest) > 1 else 1
-    try:
-        return dt.date(int(y), int(m), int(d)).isoformat()
-    except (TypeError, ValueError):
-        return None
-
-
 def parse(item, code):
     title = clean((item.get("title") or [""])[0])
-    if not title or SKIP_TITLE.search(title):
+    if not title or SKIP_TITLE.search(title) or SKIP_TITLE_ANY.search(title):
         return None
     authors = ", ".join(
         " ".join(p for p in (a.get("given"), a.get("family")) if p)
@@ -139,8 +97,7 @@ def parse(item, code):
     if len(ab) > limit:
         ab = ab[:limit].rsplit(" ", 1)[0] + "…"
     themes, area = tag(title + " " + ab)
-    display_date = date_from_parts(item, "posted") if code == "SSRN" else None
-    display_date = display_date or (item.get("created") or {}).get("date-time", "")[:10]
+    display_date = (item.get("created") or {}).get("date-time", "")[:10]
     return {
         "j": code, "t": title, "d": display_date,
         "a": area, "th": themes, "au": authors, "ab": ab,
@@ -186,184 +143,148 @@ def fetch_journals(since, until):
     return out
 
 
+def ssrn_score(p):
+    """Ranking only: title hits count double; corporate context adds two."""
+    title = p["t"].lower()
+    text = f"{title} {p.get('ab','').lower()}"
+    return (
+        2 * sum(bool(r.search(title)) for r in AREA_RX.values())
+        + sum(bool(r.search(text)) for r in AREA_RX.values())
+        + 2 * bool(SSRN_CONTEXT_RX.search(text))
+    )
+
+
 def fetch_ssrn(since, until):
-    """Fetch recent SSRN DOI registrations from Crossref prefix 10.2139."""
+    """SSRN DOI registrations (Crossref prefix 10.2139) created in the window."""
     cfg = CFG["ssrn"]
     out, seen = [], set()
-    cursor = "*"
-    raw_rows = 0
-    total_available = None
-    rows = 1000
-    max_pages = cfg.get("max_pages", 30)
+    cursor, raw_rows, total_available, exhausted = "*", 0, None, False
+    rows, max_pages = 1000, cfg.get("max_pages", 60)
 
     for _ in range(max_pages):
         data = get(f"{API}/prefixes/{cfg['prefix']}/works", {
             "filter": f"from-created-date:{since},until-created-date:{until}",
-            "rows": rows,
-            "cursor": cursor,
+            "rows": rows, "cursor": cursor,
             "select": "DOI,title,author,abstract,created,URL",
         })
         if data is None:
             raise RuntimeError(f"Crossref SSRN prefix {cfg['prefix']} was not found")
-
         msg = data.get("message") or {}
         if total_available is None:
             total_available = int(msg.get("total-results") or 0)
-            if total_available <= 0:
-                raise RuntimeError(
-                    "Crossref SSRN prefix returned zero recent DOI registrations; refusing to publish."
-                )
-            capacity = rows * max_pages
-            if total_available > capacity:
-                raise RuntimeError(
-                    f"Crossref SSRN query has {total_available} records but capacity is {capacity}; "
-                    "increase max_pages rather than silently truncate."
-                )
 
         items = msg.get("items") or []
         raw_rows += len(items)
         for it in items:
             p = parse(it, "SSRN")
-            if not p:
+            if not p or p["doi"] in seen:
                 continue
-            text = f"{p.get('t','')} {p.get('ab','')}".lower()
-            # Keep papers that map to a classic corporate-finance area.
-            # For emerging themes, require explicit firm/corporate context.
-            classic_match = p.get("a") != "General"
-            themed_corporate_match = bool(p.get("th")) and bool(SSRN_CONTEXT_RX.search(text))
-            if not (classic_match or themed_corporate_match):
+            text = f"{p['t']} {p.get('ab','')}".lower()
+            classic = p["a"] != "General"
+            themed = bool(p["th"]) and bool(SSRN_CONTEXT_RX.search(text))
+            if not (classic or themed):
                 continue
-            key = p.get("doi") or p.get("url") or p.get("t","").lower()
-            if key in seen:
-                continue
-            seen.add(key)
+            seen.add(p["doi"])
             out.append(p)
 
         cursor = msg.get("next-cursor")
-        if not items or not cursor or raw_rows >= total_available:
+        if len(items) < rows or not cursor:
+            exhausted = True
             break
 
-    if total_available is None or raw_rows < total_available:
+    total_available = total_available or 0
+    drift = total_available - raw_rows
+    complete = exhausted and raw_rows > 0 and drift <= max(5, total_available // 200)
+    if not complete:
         raise RuntimeError(
-            f"Crossref SSRN pagination incomplete: fetched {raw_rows} of {total_available} records."
+            f"Crossref SSRN retrieval incomplete: {raw_rows} of {total_available} records, "
+            f"cursor exhausted={exhausted}. Raise ssrn.max_pages if the window is long."
         )
 
-    out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
+    out.sort(key=lambda p: (ssrn_score(p), p["d"], p["t"]), reverse=True)
     kept = out[:cfg.get("max_items", 300)]
+    kept.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
     print(
-        f"  SSRN  {len(kept):3d} kept of {raw_rows} recent DOI registrations "
-        f"({len(out)} corporate-finance keyword matches)",
+        f"  SSRN examined {raw_rows} of {total_available}, matched {len(out)}, "
+        f"kept {len(kept)}, dropped by cap {len(out)-len(kept)}",
         flush=True,
     )
     return kept, {
         "status": "ok",
-        "raw_rows": raw_rows,
+        "source": f"Crossref DOI prefix {cfg['prefix']}",
         "total_available": total_available,
-        "complete": raw_rows >= total_available,
+        "raw_rows": raw_rows,
+        "complete": True,
         "keyword_matches": len(out),
         "kept": len(kept),
-        "source": f"Crossref DOI prefix {cfg['prefix']}",
+        "dropped_by_cap": len(out) - len(kept),
     }
 
 
-def _fetch_text(url, label, params=None):
-    last = None
-    for attempt in range(4):
+
+def _load_nber_cache():
+    if not NBER_CACHE.exists():
+        raise RuntimeError(f"Missing NBER cache: {NBER_CACHE}")
+    data = json.loads(NBER_CACHE.read_text(encoding="utf-8"))
+    if data.get("program_code") != CFG["nber"].get("program_code", "CF"):
+        raise RuntimeError("NBER cache program code does not match config")
+    papers = data.get("papers")
+    if not isinstance(papers, list) or not papers:
+        raise RuntimeError("NBER cache contains no Corporate Finance papers")
+    refreshed = dt.date.fromisoformat(data["refreshed"])
+    age = (dt.date.today() - refreshed).days
+    return data, papers, age
+
+
+def _issue_month(value):
+    try:
+        d = dt.datetime.strptime(value, "%Y-%m").date()
+        return d.year, d.month
+    except (TypeError, ValueError):
+        return None
+
+
+def published_nber_dois(exclude):
+    """DOIs of NBER papers already shown in earlier issue snapshots."""
+    dois = set()
+    for f in (ROOT / "issues").glob("*/data.json"):
+        if f.parent.name == exclude:
+            continue
         try:
-            r = requests.get(url, params=params, headers=HTML_HEADERS, timeout=90)
-            if r.status_code == 200 and r.text.strip():
-                return r.text
-            last = f"HTTP {r.status_code}"
-        except requests.RequestException as e:
-            last = e
-        time.sleep(4 * (attempt + 1))
-    raise RuntimeError(f"{label} request failed: {last}")
-
-
-def _nber_issue_overlaps(value, since_d, until_d):
-    value = clean(value)
-    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y-%m", "%m/%Y", "%B %Y", "%b %Y"):
-        try:
-            d = dt.datetime.strptime(value, fmt).date()
-            if fmt in ("%Y-%m", "%m/%Y", "%B %Y", "%b %Y"):
-                if d.month == 12:
-                    month_end = dt.date(d.year + 1, 1, 1) - dt.timedelta(days=1)
-                else:
-                    month_end = dt.date(d.year, d.month + 1, 1) - dt.timedelta(days=1)
-                return not (month_end < since_d or d > until_d)
-            return since_d <= d <= until_d
-        except ValueError:
-            pass
-    return False
-
-
-def _nber_tsv(name):
-    base = CFG["nber"]["metadata_base"].rstrip("/")
-    text = _fetch_text(f"{base}/{name}.tsv", f"NBER {name}.tsv")
-    rows = list(csv.DictReader(io.StringIO(text), delimiter="\t"))
-    if not rows:
-        raise RuntimeError(f"NBER {name}.tsv parsed to zero rows")
-    return rows
+            rows = json.loads(f.read_text(encoding="utf-8")).get("nber", [])
+        except Exception:
+            continue
+        dois.update((p.get("doi") or "").lower() for p in rows)
+    return {d for d in dois if d}
 
 
 def nber_candidates(since, until):
-    """Return current-window candidates in the official NBER Corporate Finance program."""
+    """Current-window candidates from the versioned NBER Corporate Finance cache."""
     since_d, until_d = dt.date.fromisoformat(since), dt.date.fromisoformat(until)
-    prog_rows = _nber_tsv("prog")
-    ref_rows = _nber_tsv("ref")
-    cf_ids = {
-        clean(r.get("paper")).lower()
-        for r in prog_rows
-        if clean(r.get("program")).upper() == CFG["nber"].get("program_code", "CF")
-    }
-    if len(cf_ids) < CFG["nber"].get("min_program_ids", 100):
-        raise RuntimeError(
-            f"NBER program metadata has only {len(cf_ids)} Corporate Finance papers; refusing to publish."
-        )
-
-    candidates = []
-    latest_issue = None
-    for r in ref_rows:
-        paper = clean(r.get("paper")).lower()
-        if paper not in cf_ids or not paper.startswith("w"):
-            continue
-        issue = clean(r.get("issue_date"))
-        # Track latest parsable issue month/date for freshness checks.
-        for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%Y-%m", "%m/%Y", "%B %Y", "%b %Y"):
-            try:
-                d = dt.datetime.strptime(issue, fmt).date()
-                latest_issue = d if latest_issue is None or d > latest_issue else latest_issue
-                break
-            except ValueError:
-                pass
-        if _nber_issue_overlaps(issue, since_d, until_d):
-            candidates.append(r)
-
-    if latest_issue is None or latest_issue < until_d - dt.timedelta(days=120):
-        raise RuntimeError(
-            f"NBER metadata appears stale (latest issue date: {latest_issue}); refusing to publish."
-        )
-    return candidates, len(cf_ids), latest_issue
+    cache, papers, age = _load_nber_cache()
+    first, last = (since_d.year, since_d.month), (until_d.year, until_d.month)
+    candidates = [p for p in papers if (_issue_month(p.get("issue_month")) or (0,0)) >= first
+                  and (_issue_month(p.get("issue_month")) or (9999,12)) <= last]
+    return candidates, cache, age
 
 
 def fetch_nber(since, until):
-    """Fetch current-window NBER Corporate Finance papers using official NBER metadata."""
+    """Fetch cached NBER Corporate Finance membership; resolve metadata via Crossref."""
     cfg = CFG["nber"]
     since_d, until_d = dt.date.fromisoformat(since), dt.date.fromisoformat(until)
-    candidates, program_count, latest_issue = nber_candidates(since, until)
-    out, checked, seen = [], 0, set()
-
-    # Abstract metadata is official and avoids relying on Crossref for abstracts.
-    abs_map = {
-        clean(r.get("paper")).lower(): clean(r.get("abstract"))
-        for r in _nber_tsv("abs")
-    }
+    catchup_d = since_d - dt.timedelta(days=cfg.get("catchup_days", 21))
+    candidates, cache, cache_age = nber_candidates(catchup_d.isoformat(), until)
+    already = published_nber_dois(exclude=until)
+    out, checked, unresolved, caught_up, seen = [], 0, 0, 0, set()
 
     for r in candidates:
-        paper = clean(r.get("paper")).lower()
-        doi = clean(r.get("doi")) or f"10.3386/{paper}"
+        paper = clean(r.get("wp")).lower()
+        if not re.fullmatch(r"w\d{4,6}", paper):
+            continue
+        doi = f"10.3386/{paper}"
         d = get(f"{API}/works/{doi}")
         if not d or not d.get("message"):
+            unresolved += 1
             continue
         checked += 1
         msg = d["message"]
@@ -371,20 +292,30 @@ def fetch_nber(since, until):
         try:
             created_d = dt.date.fromisoformat(created)
         except ValueError:
-            continue
-        if not (since_d <= created_d <= until_d):
+            unresolved += 1
             continue
 
-        title = clean(r.get("title")) or clean((msg.get("title") or [""])[0])
-        if not title or SKIP_TITLE.search(title):
+        in_window = since_d <= created_d <= until_d
+        late = catchup_d <= created_d < since_d and doi not in already
+        if not (in_window or late):
             continue
-        authors = clean(r.get("author")) or "—"
-        ab = abs_map.get(paper, "")
+        caught_up += int(late)
+
+        title = clean(r.get("title")) or clean((msg.get("title") or [""])[0])
+        if not title or SKIP_TITLE.search(title) or SKIP_TITLE_ANY.search(title):
+            continue
+        authors = clean(r.get("authors"))
+        if not authors:
+            authors = ", ".join(
+                " ".join(x for x in (a.get("given"), a.get("family")) if x)
+                for a in msg.get("author", [])
+                if a.get("given") or a.get("family")
+            ) or "—"
+        ab = clean(msg.get("abstract", ""))
         limit = CFG.get("abstract_chars", 700)
         if len(ab) > limit:
             ab = ab[:limit].rsplit(" ", 1)[0] + "…"
         themes, area = tag(f"{title} {ab}")
-        doi = doi.lower()
         if doi in seen:
             continue
         seen.add(doi)
@@ -401,22 +332,26 @@ def fetch_nber(since, until):
             "wp": paper[1:],
         })
 
-    if candidates and checked == 0:
-        raise RuntimeError("NBER current-window candidates found but none resolved in Crossref.")
     out.sort(key=lambda p: (p["d"], p["t"]), reverse=True)
+    cache_warn = cfg.get("cache_warn_days", 45)
+    status = "ok" if cache_age <= cache_warn and (checked > 0 or not candidates) else "degraded"
     print(
-        f"  NBER  {len(out):3d} kept from {len(candidates)} current-month CF candidates "
-        f"({program_count} total CF papers)",
+        f"  NBER {len(out):3d} kept from {len(candidates)} cached CF candidates; "
+        f"resolved {checked}, unresolved {unresolved}, catch-up {caught_up}, cache age {cache_age}d",
         flush=True,
     )
-    return out[: cfg.get("max_items", 100)], {
-        "status": "ok",
-        "program_ids": program_count,
-        "metadata_checked": checked,
+    return out[:cfg.get("max_items", 100)], {
+        "status": status,
+        "source": "repo NBER CF cache + Crossref",
+        "cache_refreshed": cache.get("refreshed"),
+        "cache_age_days": cache_age,
         "candidates": len(candidates),
+        "metadata_checked": checked,
+        "unresolved": unresolved,
+        "caught_up": caught_up,
         "kept": len(out),
-        "latest_seen": latest_issue.isoformat(),
     }
+
 
 
 def title_key(title):
@@ -461,13 +396,10 @@ def check():
     owner = (d.get("message") or {}).get("name") or "registered prefix"
     print(f"SSRN  Crossref prefix {ssrn['prefix']}: {owner}")
 
-    today = dt.date.today()
-    candidates, total_cf, latest_issue = nber_candidates(
-        (today - dt.timedelta(days=31)).isoformat(), today.isoformat()
-    )
+    cache, papers, age = _load_nber_cache()
     print(
-        f"NBER  official metadata preflight: {total_cf} CF papers, "
-        f"{len(candidates)} recent candidates, latest issue {latest_issue}"
+        f"NBER  cached CF membership: {len(papers)} papers, refreshed {cache.get('refreshed')}, "
+        f"age {age} days"
     )
 
 def main():

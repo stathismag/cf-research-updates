@@ -94,9 +94,7 @@ Past events and expired deadlines are hidden automatically, so old entries can s
 - Journal articles: free Crossref API, by journal ISSN. The DOI registration date is used as the online-first date.
   Each paper is matched against the keyword dictionaries in `config.json` for themes, and assigned the classic area
   with the most keyword hits. Management Science is only included when a paper matches at least one keyword.
-- SSRN: the updater queries Crossref DOI prefix `10.2139` for registrations in the update window, then applies the project's corporate-finance keyword rules to titles and available abstracts.
-  keeps titles matching corporate-finance keywords. Abstracts are usually missing there, so this list is approximate.
-- If GitHub shows a notice that the scheduled workflow was disabled for inactivity, re-enable it in the Actions tab.
+- SSRN: the updater queries Crossref DOI prefix `10.2139` for registrations in the update window, ranks corporate-finance matches by title/abstract relevance, and caps only after ranking.
 
 
 ## Crawlable archive and rerun safety
@@ -113,6 +111,11 @@ public dataset to only the overlap days.
 
 ## Working-paper sources
 
-- NBER: official weekly NBER Working Paper metadata (`prog.tsv`, `ref.tsv`, `abs.tsv`) is used to identify Corporate Finance program papers (`CF`). Crossref registration dates provide day-level filtering for the bi-weekly window.
+- NBER: Corporate Finance program membership is read from a versioned cache in `cache/nber_cf_program.json`; Crossref supplies DOI metadata and day-level registration dates. A 21-day catch-up window retries late Crossref registrations.
 - SSRN: recent Financial Economics Network (FEN) listings filtered by the project's corporate-finance keyword rules.
 - The update workflow is fail-closed: source preflights, Python compilation, JSON/data validation, generated-site validation, newsletter dry-run, and JavaScript syntax checking all run before any generated files are committed.
+
+
+## Production safety
+
+The scheduled workflow is intentionally paused until a complete manual validation run passes. Manual runs default to `publish=false` and `send_email=false`. Email sending is permitted only when `publish=true`, and generated site/data files are committed before Buttondown is called. `sent.json` is committed separately after a successful send.
