@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 import argparse
 import datetime as dt
 import json
@@ -20,7 +21,7 @@ def validate_paper(p, source, start, end):
     missing=REQUIRED-set(p)
     if missing: fail(f"{source}: missing fields {sorted(missing)}")
     if not p["t"] or not isinstance(p["th"], list): fail(f"{source}: invalid title/themes")
-    try: day=dt.date.fromisoformat(p["d"])
+    try: day=dt.date.fromisoformat(p["d"]) 
     except Exception: fail(f"{source}: invalid date {p.get('d')!r}")
     if not (start <= day <= end): fail(f"{source}: out-of-window paper {p['d']} {p['t'][:80]}")
     u=urlparse(p["url"])
