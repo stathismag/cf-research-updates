@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
 """Fast, network-free repository invariants checked before any upstream request."""
 import datetime as dt
 import json
