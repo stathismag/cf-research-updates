@@ -8,16 +8,17 @@ jobs:
     env:
       CROSSREF_EMAIL: ${{ secrets.CROSSREF_EMAIL }}
     steps:
-      - name: Check what NBER allows automated clients to read (honest user agent, one request each)
+      - name: Read robots.txt in full and inspect how the program page loads its paper list
         run: |
           UA="cf-research-updates/1.0 (+https://github.com/stathismag/cf-research-updates; mailto:${CROSSREF_EMAIL})"
-          probe() {
-            echo "=================== $1"
-            curl -sS -m 40 -A "$UA" -o /tmp/p.out -w "HTTP %{http_code} type=%{content_type} size=%{size_download}\n" "$1" 2>&1 || true
-            head -c 600 /tmp/p.out | tr '\n' ' ' | cut -c1-600; echo
-            echo "paper links: $(grep -o '/papers/w[0-9]\{4,6\}' /tmp/p.out | sort -u | wc -l)"
-          }
-          probe "https://www.nber.org/robots.txt"
-          probe "https://www.nber.org/rss/new.xml"
-          probe "https://www.nber.org/programs-projects/programs-working-groups/corporate-finance"
-          probe "https://api.crossref.org/works?filter=prefix:10.3386&rows=2&sort=created&order=desc&select=DOI,title,created"
+          echo "=========== robots.txt"; curl -sS -m 40 -A "$UA" https://www.nber.org/robots.txt | grep -v '^#' | grep -v '^$'
+          curl -sS -m 40 -A "$UA" -o /tmp/page.html https://www.nber.org/programs-projects/programs-working-groups/corporate-finance
+          echo "=========== page: size $(wc -c < /tmp/page.html)"
+          echo "--- api / listing / json hints:"
+          grep -o -i '[^"'"'"' ]*\(api/v1\|working_page_listing\|/search\?\)[^"'"'"' ]*' /tmp/page.html | sort -u | head -20
+          echo "--- script/data attributes mentioning program/CF:"
+          grep -o -i '\(data-[a-z-]*\|"program[a-z_]*"\)=\?"\?[^" >]\{0,80\}' /tmp/page.html | sort -u | head -20
+          echo "--- title/links containing 'working' near 'paper':"
+          grep -o '<a [^>]*href="[^"]*/papers/[^"]*"[^>]*>' /tmp/page.html | head -5
+          grep -o 'drupalSettings[^<]\{0,300\}' /tmp/page.html | head -3
+          echo "--- script tags:"; grep -o '<script[^>]*src="[^"]*"' /tmp/page.html | head -15
