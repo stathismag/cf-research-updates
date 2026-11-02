@@ -1,9 +1,8 @@
 name: Update research listings
 
 on:
-  schedule:
-    - cron: "0 6 1,15 * *"   # 06:00 UTC on the 1st and 15th: scheduled runs publish and email
-  workflow_dispatch:         # manual runs only publish/email when the boxes below are ticked
+  # Schedule paused until a full manual validation run has passed.
+  workflow_dispatch:
     inputs:
       days:
         description: "Optional: look back this many days instead of since the last run (e.g. 14)"
@@ -109,7 +108,7 @@ jobs:
           if-no-files-found: error
 
       - name: Commit generated files if publishing
-        if: github.event_name == 'schedule' || inputs.publish == true
+        if: inputs.publish == true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -123,14 +122,14 @@ jobs:
           fi
 
       - name: Email the digest to subscribers
-        if: github.event_name == 'schedule' || (inputs.send_email == true && inputs.publish == true)
+        if: inputs.send_email == true && inputs.publish == true
         run: python scripts/send_digest.py
         env:
           BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
           SITE_URL: https://corporatefinanceupdates.com
 
       - name: Record emailed papers
-        if: github.event_name == 'schedule' || (inputs.send_email == true && inputs.publish == true)
+        if: inputs.send_email == true && inputs.publish == true
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
