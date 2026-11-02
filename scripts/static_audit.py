@@ -35,8 +35,11 @@ def main():
     tomllib.loads(netlify)
 
     # Production safety.
-    if re.search(r"(?m)^\s*schedule\s*:", workflow):
-        fail("scheduled workflow must remain paused until manual validation passes")
+    # The schedule was enabled after manual validation run #14 passed; only the approved cron is allowed.
+    if not re.search(r'(?m)^\s*-\s*cron:\s*"0 6 1,15 \* \*"', workflow) or len(re.findall(r"(?m)^\s*-\s*cron:", workflow)) != 1:
+        fail("schedule must be exactly the approved twice-monthly cron: 0 6 1,15 * *")
+    if "github.event_name == 'schedule' || inputs.publish == true" not in workflow:
+        fail("scheduled runs must publish")
     if "inputs.send_email == true && inputs.publish == true" not in workflow:
         fail("email is not gated by publish=true")
     if "git add data.json sent.json" in workflow:
@@ -98,7 +101,7 @@ def main():
 
     print(
         f"STATIC AUDIT PASS: {len(papers)} cached NBER CF papers; "
-        f"cache age {age}d; schedule paused; publish/email safety intact"
+        f"cache age {age}d; schedule active (1st/15th); publish/email safety intact"
     )
     return 0
 
