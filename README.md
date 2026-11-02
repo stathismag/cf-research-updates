@@ -115,4 +115,4 @@ public dataset to only the overlap days.
 
 ## Working-paper sources
 
-- NBER: Corporate Finance program membership is read from a versioned cache in `cache/nber_cf_program.json`; Crossref supplies DOI metadata and day-level registration dates. A 21-day catch-up win[...]
+- NBER: Corporate Finance program membership is read from a versioned cache in `cache/nber_cf_program.json`; Crossref supplies DOI metadata and day-level registration dates. The cache is refreshed automatically at the start of every run by `scripts/refresh_nber_cache.py` (NBER's own program listing; honest user agent, a few requests, never overwrites on a bad response). A 21-day catch-up win[...]

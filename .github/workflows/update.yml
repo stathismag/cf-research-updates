@@ -40,9 +40,15 @@ jobs:
 
       - run: pip install requests
 
+      - name: Refresh NBER Corporate Finance cache
+        # Reads NBER's own program listing. If NBER is unreachable the committed cache is used instead,
+        # and the static audit below rejects it when it is older than cache_warn_days.
+        continue-on-error: true
+        run: python scripts/refresh_nber_cache.py
+
       - name: Static syntax and config checks
         run: |
-          python -m py_compile scripts/fetch_papers.py scripts/build_site.py scripts/send_digest.py scripts/validate_update.py scripts/static_audit.py
+          python -m py_compile scripts/fetch_papers.py scripts/build_site.py scripts/send_digest.py scripts/validate_update.py scripts/static_audit.py scripts/refresh_nber_cache.py
           python -m json.tool scripts/config.json > /dev/null
           python -m json.tool cache/nber_cf_program.json > /dev/null
           python scripts/static_audit.py
@@ -112,7 +118,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data.json index.html issues archive sitemap.xml robots.txt
+          git add data.json index.html issues archive sitemap.xml robots.txt cache/nber_cf_program.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

@@ -359,6 +359,9 @@
     "program_code": "CF",
     "catchup_days": 21,
     "cache_warn_days": 7,
+    "listing_nid": 11556,
+    "refresh_pages": 6,
+    "refresh_months": 4,
     "max_items": 100
   }
 }
