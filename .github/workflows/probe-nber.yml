@@ -8,17 +8,30 @@ jobs:
     env:
       CROSSREF_EMAIL: ${{ secrets.CROSSREF_EMAIL }}
     steps:
-      - name: Read robots.txt in full and inspect how the program page loads its paper list
+      - name: Read the program page's own listing endpoint (honest user agent, polite, few requests)
         run: |
           UA="cf-research-updates/1.0 (+https://github.com/stathismag/cf-research-updates; mailto:${CROSSREF_EMAIL})"
-          echo "=========== robots.txt"; curl -sS -m 40 -A "$UA" https://www.nber.org/robots.txt | grep -v '^#' | grep -v '^$'
-          curl -sS -m 40 -A "$UA" -o /tmp/page.html https://www.nber.org/programs-projects/programs-working-groups/corporate-finance
-          echo "=========== page: size $(wc -c < /tmp/page.html)"
-          echo "--- api / listing / json hints:"
-          grep -o -i '[^"'"'"' ]*\(api/v1\|working_page_listing\|/search\?\)[^"'"'"' ]*' /tmp/page.html | sort -u | head -20
-          echo "--- script/data attributes mentioning program/CF:"
-          grep -o -i '\(data-[a-z-]*\|"program[a-z_]*"\)=\?"\?[^" >]\{0,80\}' /tmp/page.html | sort -u | head -20
-          echo "--- title/links containing 'working' near 'paper':"
-          grep -o '<a [^>]*href="[^"]*/papers/[^"]*"[^>]*>' /tmp/page.html | head -5
-          grep -o 'drupalSettings[^<]\{0,300\}' /tmp/page.html | head -3
-          echo "--- script tags:"; grep -o '<script[^>]*src="[^"]*"' /tmp/page.html | head -15
+          B="https://www.nber.org/api/v1/generic_listing/nid/11556"
+          for u in \
+            "$B/contentType/working_paper/search/contentType?page=1&perPage=5" \
+            "$B/contentType,contentType,contentType,contentType,contentType,contentType,contentType,contentType/article,book,center_paper,chapter,conference,video,project,working_paper/search/contentType?page=1&perPage=5" ; do
+            echo "=========== $u"
+            curl -sS -m 40 -A "$UA" -H "Accept: application/json" -o /tmp/j.out -w "HTTP %{http_code} type=%{content_type} size=%{size_download}\n" "$u"
+            python3 - <<'PY'
+          import json
+          try:
+              d=json.load(open("/tmp/j.out"))
+          except Exception as e:
+              print("not json:",e); print(open("/tmp/j.out").read()[:300]); raise SystemExit
+          def shape(x,depth=0):
+              if isinstance(x,dict): return {k:shape(v,depth+1) if depth<2 else type(v).__name__ for k,v in list(x.items())[:14]}
+              if isinstance(x,list): return [len(x), shape(x[0],depth+1) if x else None]
+              return type(x).__name__
+          print("shape:",json.dumps(shape(d))[:900])
+          res=d.get("results") or d.get("items") or []
+          for r in res[:3]: print(json.dumps(r)[:700])
+          for k in ("totalResults","total","count","totalPages","page","perPage"):
+              if k in d: print(k,"=",d[k])
+          PY
+            sleep 3
+          done
